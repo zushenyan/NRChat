@@ -33,6 +33,7 @@
     "webpack-dev-server": "^1.12.1"
   },
   "dependencies": {
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "redis": "^2.3.1"
   }
 }
