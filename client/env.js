@@ -54,8 +54,8 @@ var path = {
 };
 
 var entry = {
-	js: ["Main.js", "/Other/Main2.js"],
-	css: ["Main.scss", "Main2.scss"],
+	js: ["/components/App.js"],
+	css: ["style.scss"],
 	html: path.src.html.files
 };
 
