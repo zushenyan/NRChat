@@ -5,6 +5,10 @@ export default class NavBar extends React.Component{
 		super(props);
 	}
 
+	handleLoginButton(event){
+		$("#login-dialog").modal("show");
+	}
+
 	render(){
 		return (
 			<nav className="navbar navbar-default navbar-fixed-top">
@@ -16,7 +20,7 @@ export default class NavBar extends React.Component{
 						<ul className="nav pull-left">
 							<li className="navbar-text pull-left">Hello Anonymous</li>
 							<li className="pull-right">
-								<button type="button" className="btn btn-default navbar-btn">Login/Signup</button>
+								<button type="button" className="btn btn-default navbar-btn" onClick={this.handleLoginButton}>Login/Signup</button>
 							</li>
 						</ul>
 					</div>

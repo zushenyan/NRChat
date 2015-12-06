@@ -68,6 +68,10 @@
 	
 	var _MessageBox2 = _interopRequireDefault(_MessageBox);
 	
+	var _Dialog = __webpack_require__(163);
+	
+	var _Dialog2 = _interopRequireDefault(_Dialog);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -93,7 +97,8 @@
 					null,
 					_react2.default.createElement(_NavBar2.default, null),
 					_react2.default.createElement(_MessageBox2.default, null),
-					_react2.default.createElement(_ChatBox2.default, null)
+					_react2.default.createElement(_ChatBox2.default, null),
+					_react2.default.createElement(_Dialog2.default, null)
 				);
 			}
 		}]);
@@ -19724,6 +19729,11 @@
 		}
 	
 		_createClass(NavBar, [{
+			key: "handleLoginButton",
+			value: function handleLoginButton(event) {
+				$("#login-dialog").modal("show");
+			}
+		}, {
 			key: "render",
 			value: function render() {
 				return _react2.default.createElement(
@@ -19757,7 +19767,7 @@
 									{ className: "pull-right" },
 									_react2.default.createElement(
 										"button",
-										{ type: "button", className: "btn btn-default navbar-btn" },
+										{ type: "button", className: "btn btn-default navbar-btn", onClick: this.handleLoginButton },
 										"Login/Signup"
 									)
 								)
@@ -19972,12 +19982,7 @@
 					),
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-1 text-left" },
-						":"
-					),
-					_react2.default.createElement(
-						"span",
-						{ className: "col-xs-7 text-left" },
+						{ className: "col-xs-8 text-left" },
 						"Hello"
 					),
 					_react2.default.createElement(
@@ -19993,6 +19998,129 @@
 	})(_react2.default.Component);
 	
 	exports.default = Message;
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Dialog = (function (_React$Component) {
+		_inherits(Dialog, _React$Component);
+	
+		function Dialog(props) {
+			_classCallCheck(this, Dialog);
+	
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Dialog).call(this, props));
+		}
+	
+		_createClass(Dialog, [{
+			key: "handleCloseButton",
+			value: function handleCloseButton(event) {
+				$("#login-dialog").modal("hide");
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				return _react2.default.createElement(
+					"div",
+					{ className: "modal fade", id: "login-dialog", role: "dialog" },
+					_react2.default.createElement(
+						"div",
+						{ className: "modal-dialog" },
+						_react2.default.createElement(
+							"div",
+							{ className: "modal-content" },
+							_react2.default.createElement(
+								"div",
+								{ className: "modal-header" },
+								_react2.default.createElement(
+									"h4",
+									{ className: "modal-title" },
+									"Join Us!"
+								)
+							),
+							_react2.default.createElement(
+								"div",
+								{ className: "modal-body" },
+								_react2.default.createElement(
+									"div",
+									{ className: "row" },
+									_react2.default.createElement(
+										"section",
+										{ className: "col-sm-12 col-md-6" },
+										_react2.default.createElement(
+											"h4",
+											null,
+											"Login"
+										),
+										_react2.default.createElement(
+											"form",
+											null,
+											_react2.default.createElement("input", { type: "email", className: "form-control", placeholder: "email" }),
+											_react2.default.createElement("input", { type: "text", className: "form-control", placeholder: "password" }),
+											_react2.default.createElement("input", { type: "submit", className: "btn btn-primary btn-block", value: "login" })
+										)
+									),
+									_react2.default.createElement(
+										"section",
+										{ className: "col-sm-12 col-md-6" },
+										_react2.default.createElement(
+											"h4",
+											null,
+											"SignUp"
+										),
+										_react2.default.createElement(
+											"div",
+											{ className: "input-group" },
+											_react2.default.createElement(
+												"form",
+												null,
+												_react2.default.createElement("input", { type: "email", className: "form-control", placeholder: "email" }),
+												_react2.default.createElement("input", { type: "text", className: "form-control", placeholder: "password" }),
+												_react2.default.createElement("input", { type: "submit", className: "btn btn-primary btn-block", value: "signup" })
+											)
+										)
+									)
+								)
+							),
+							_react2.default.createElement(
+								"div",
+								{ className: "modal-footer" },
+								_react2.default.createElement(
+									"button",
+									{ type: "button", className: "btn btn-primary", onClick: this.handleCloseButton },
+									"close"
+								)
+							)
+						)
+					)
+				);
+			}
+		}]);
+	
+		return Dialog;
+	})(_react2.default.Component);
+	
+	exports.default = Dialog;
 
 /***/ }
 /******/ ]);

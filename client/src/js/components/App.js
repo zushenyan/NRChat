@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import NavBar from "./NavBar";
 import ChatBox from "./ChatBox";
 import MessageBox from "./MessageBox";
+import Dialog from "./Dialog";
 
 class App extends React.Component{
 	constructor(props){
@@ -16,6 +17,7 @@ class App extends React.Component{
 				<NavBar />
 				<MessageBox />
 				<ChatBox />
+				<Dialog />
 			</div>
 		);
 	}
