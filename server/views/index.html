@@ -5,39 +5,66 @@
 	</head>
 	<body>
 		<div>
-			<div id="messageBox"></div>
 			<input type="text" id="messageInput">
 			<button id="sendButton">send</button>
-			<button id="fetchButton">fetch</button>
 		</div>
+		<div>
+			<button id="joinButton">join</button>
+		</div>
+		<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
 		<script>
-			var sendButton = document.getElementById("sendButton");
-			var fetchButton = document.getElementById("fetchButton");
 			var messageInput = document.getElementById("messageInput");
-			var messageBox = document.getElementById("messageBox");
+			var sendButton = document.getElementById("sendButton");
+			var joinButton = document.getElementById("joinButton");
 
-			sendButton.addEventListener("click", function(e){
-				var ajax = new XMLHttpRequest();
-				ajax.addEventListener("readystatechange", function(){
-					if(ajax.readyState === XMLHttpRequest.DONE){
-						if(ajax.status === 200){
-							console.log(ajax.responseText);
-						}
-					}
-				});
-				ajax.open("POST", "/api/chat");
-				ajax.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-				ajax.send("msg=" + encodeURIComponent(messageInput.value));
+			var username;
+			var socket = io.connect("http://localhost:8080");
+
+			socket.on("chat message", function(data){
+				console.log(data);
+			});
+			socket.on("server message", function(data){
+				console.log(data);
 			});
 
-			fetchButton.addEventListener("click", function(){
+			sendButton.addEventListener("click", function(e){
+				var data = {
+					user: username,
+					message: messageInput.value,
+					id: socket.id
+				};
+				messageInput.value = "";
+				socket.emit("chat message", data);
+			});
+
+			joinButton.addEventListener("click", function(e){
+				username = prompt("your name?");
+				var data = {
+					user: username,
+					id: socket.id
+				};
+				socket.emit("hello", data);
+			});
+
+			window.addEventListener("DOMContentLoaded", fetchMessages);
+			window.addEventListener("beforeunload", disconnect);
+
+			function fetchMessages(e){
 				var ajax = new XMLHttpRequest();
 				ajax.addEventListener("load", function(){
 					console.log(JSON.parse(ajax.responseText));
 				});
-				ajax.open("GET", "/api/chat");
+				ajax.open("GET", "http://localhost:8080/api/messages");
 				ajax.send();
-			});
+			}
+
+			function disconnect(e){
+				var data = {
+					user: username,
+					id: socket.id
+				};
+				socket.emit("before disconnect", data);
+			}
 		</script>
 	</body>
 </html>
