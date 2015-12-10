@@ -5,44 +5,31 @@ const SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
 
 // initial store
 let store = (function(){
-	let socket = io.connect(SERVER_URL);
-
 	return {
 		username: "",
 		messages: [],
-		socket: socket
+		socket: null
 	}
 })();
 
 // action constants
-const ACTION_ON_CHAT_MESSAGE = "on chat message";
-const ACTION_ON_SERVER_MESSAGE = "on server message";
-const ACTION_FETCH_MESSAGES = "fetch messages";
+const ACTION_SETUP = "setup";
 const ACTION_SET_USERNAME = "set username";
 const ACTION_SEND_MESSAGE = "send message";
+const ACTION_DISCONNECT = "disconnect";
+const ACTION_FETCH_MESSAGES = "fetch messages";
+const ACTION_PUSH_MESSAGE = "push message";
 
 // actions
-export function onChatMessage(cb){
+export function setup(onChatFunc, onServerFunc){
 	return {
-		type: ACTION_ON_CHAT_MESSAGE,
-		callback: cb
+		type: ACTION_SETUP,
+		onChatFunc: onChatFunc,
+		onServerFunc: onServerFunc
 	}
 }
 
-export function onServerMessage(cb){
-	return {
-		type: ACTION_ON_SERVER_MESSAGE,
-		callback: cb
-	}
-}
-
-export function fetchMessage(){
-	return {
-		type: ACTION_FETCH_MESSAGES,
-	}
-}
-
-export function fetchMessage(username){
+export function setUsername(username){
 	return {
 		type: ACTION_SET_USERNAME,
 		username: username
@@ -56,39 +43,57 @@ export function sendMessage(message){
 	}
 };
 
+export function disconnect(){
+	return {
+		type: ACTION_DISCONNECT
+	}
+}
+
+export function fetchMessages(){
+	return {
+		type: ACTION_FETCH_MESSAGES,
+	}
+}
+
+export function pushMessage(message){
+	return {
+		type: ACTION_PUSH_MESSAGE,
+		message: message
+	}
+}
+
 // reducer
 export function reducer(state = store, action){
 	switch(action.type){
-		case ACTION_ON_CHAT_MESSAGE:
-			return _onChatMessage(state, action);
-		case ACTION_ON_SERVER_MESSAGE:
-			return _onServerMessage(state, action);
+		case ACTION_SETUP:
+			return _setup(state, action);
 		case ACTION_FETCH_MESSAGES:
-			return _fetchMessage(state, action);
+			return _fetchMessages(state, action);
+		case ACTION_PUSH_MESSAGE:
+			return _pushMessage(state, action);
 		case ACTION_SET_USERNAME:
 			return _setUsername(state, action);
 		case ACTION_SEND_MESSAGE:
 			return _sendMessage(state, action);
+		case ACTION_DISCONNECT:
+			return _disconnect(state, action);
 		default:
 			return state;
 	}
 }
 
-function _onChatMessage(state, action){
-	state.socket.on("chat message", action.cb);
+function _setup(state, action){
+	let socket = io.connect(SERVER_URL);
+	socket.on("chat message", action.onClientFunc);
+	socket.on("server message", action.onServerFunc);
+	state.socket = socket;
 	return Object.assign(state, {
-		callback: action.cb
+		onChatFunc: action.onChatFunc,
+		onServerFunc: action.onServerFunc
 	});
 }
 
-function _onServerMessage(state, action){
-	state.socket.on("server message", action.cb);
-	return Object.assign(state, {
-		callback: action.cb
-	});
-}
-
-function _fetchMessage(state, action){
+function _fetchMessages(state, action){
 	var ajax = new XMLHttpRequest();
 	ajax.addEventListener("load", function(){
 		state.messages = JSON.parse(ajax.responseText);
@@ -96,6 +101,13 @@ function _fetchMessage(state, action){
 	ajax.open("GET", SERVER_FETCH_MESSAGE);
 	ajax.send();
 	return state;
+}
+
+function _pushMessage(state, action){
+	state.messages.push(action.message);
+	return Object.assign(state, {
+		message: action.message
+	});
 }
 
 function _setUsername(state, action){
@@ -120,4 +132,13 @@ function _sendMessage(state, action){
 	return Object.assign(state, {
 		message: action.message
 	});
+}
+
+function _disconnect(state, action){
+	let data = {
+		user: state.username,
+		id: state.socket.id
+	};
+	state.socket.emit("before disconnect", data);
+	return state;
 }

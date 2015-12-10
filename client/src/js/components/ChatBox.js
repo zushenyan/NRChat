@@ -1,8 +1,27 @@
 import React from "react";
 
+import Store from "../redux/MainReducer";
+import * as ChatAction from "../redux/NRChatReducer";
+
 export default class ChatBox extends React.Component{
 	constructor(props){
 		super(props);
+	}
+
+	handleMessageInput(e){
+		if(e.key === "Enter"){
+			e.preventDefault();
+			this.handleSend();
+		}
+	}
+
+	handleSend(e){
+		let messageInput = document.getElementById("messageInput");
+		let message = messageInput.value;
+		if(message && message !== ""){
+			Store.dispatch(ChatAction.sendMessage(message));
+			messageInput.value = "";
+		}
 	}
 
 	render(){
@@ -12,10 +31,15 @@ export default class ChatBox extends React.Component{
 					<div className="container-fluid">
 						<div className="row">
 							<div className="col-xs-9">
-								<input type="text" style={{width: "100%"}} className="form-control" name="chat-box" id="chat-box" placeholder="type message here" />
+								<input type="text"
+											style={{width: "100%"}}
+											className="form-control"
+											id="messageInput"
+											placeholder="say somthing here!"
+											onKeyPress={ this.handleMessageInput.bind(this) } />
 							</div>
 							<div className="col-xs-3">
-								<button type="button" className="btn btn-primary btn-block" id="sendButton">Send</button>
+								<button type="button" className="btn btn-primary btn-block" onClick={ this.handleSend.bind(this) }>Send</button>
 							</div>
 						</div>
 					</div>

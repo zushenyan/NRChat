@@ -19,12 +19,12 @@ function handleConnect(socket){
 
 function registerHelloEvent(socket){
 	socket.on(EVENT_HELLO, function(data){
+		if(!isValidData(data, checkUser)){ return; }
 		var username = makeName(data);
 		console.log(username + " has joined");
-		if(!isValidData(data, checkUser)){ return; }
 		data.message = username + " has joined the room.";
 		data.from = "server";
-		broadcastMessage(data);
+		broadcastMessage(EVENT_SERVER_MESSAGE, data);
 	});
 }
 
@@ -35,22 +35,23 @@ function registerBeforeDisconnectEvent(socket){
 		console.log(username + " has disconnected");
 		data.message = username + " has left the room.";
 		data.from = "server";
-		broadcastMessage(data);
+		broadcastMessage(EVENT_SERVER_MESSAGE, data);
 	});
 }
 
 function registerTransferMessageEvent(socket){
 	socket.on(EVENT_CHAT_MESSAGE, function(data){
-		data.from = "client";
 		if(!isValidData(data, checkUser)){ return; }
 		if(!isValidData(data, checkMessage)){ return; }
+		console.log(makeName(data) + " : " + data.message);
+		data.from = "client";
 		db.saveMessage(data);
-		broadcastMessage(data);
+		broadcastMessage(EVENT_CHAT_MESSAGE, data);
 	});
 }
 
-function broadcastMessage(data){
-	io.emit(EVENT_CHAT_MESSAGE, data);
+function broadcastMessage(event, data){
+	io.emit(event, data);
 }
 
 function makeName(data){
