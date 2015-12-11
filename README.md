@@ -2,16 +2,15 @@
 NRChat represents Node React Chat, which is yet another web development practice.
 
 # How to Run
-Visit [NRChat on Heroku](http://nrchat.herokuapp.com).
-
-Or run it locally:
+Run it locally:
 
 ```bash
 $ clone https://github.com/zushenyan/NRChat.git
 $ cd NRChat
 $ node server/server
-$ open localhost:8080
 ```
+
+And go to `http://localhost:8080`.
 
 # Tools Involved
 
