@@ -30,7 +30,7 @@ export default class ChatBox extends React.Component{
 				<form className="navbar-form">
 					<div className="container-fluid">
 						<div className="row">
-							<div className="col-xs-9">
+							<div className="col-xs-8">
 								<input type="text"
 											style={{width: "100%"}}
 											className="form-control"
@@ -38,7 +38,7 @@ export default class ChatBox extends React.Component{
 											placeholder="say somthing here!"
 											onKeyPress={ this.handleMessageInput.bind(this) } />
 							</div>
-							<div className="col-xs-3">
+							<div className="col-xs-4">
 								<button type="button" className="btn btn-primary btn-block" onClick={ this.handleSend.bind(this) }>Send</button>
 							</div>
 						</div>

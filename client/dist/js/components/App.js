@@ -60,15 +60,15 @@
 	
 	var _NavBar2 = _interopRequireDefault(_NavBar);
 	
-	var _ChatBox = __webpack_require__(221);
+	var _ChatBox = __webpack_require__(222);
 	
 	var _ChatBox2 = _interopRequireDefault(_ChatBox);
 	
-	var _MessageBox = __webpack_require__(222);
+	var _MessageBox = __webpack_require__(223);
 	
 	var _MessageBox2 = _interopRequireDefault(_MessageBox);
 	
-	var _Dialog = __webpack_require__(223);
+	var _Dialog = __webpack_require__(224);
 	
 	var _Dialog2 = _interopRequireDefault(_Dialog);
 	
@@ -20468,7 +20468,18 @@
 	
 	var _socket2 = _interopRequireDefault(_socket);
 	
+	var _objectAssign = __webpack_require__(221);
+	
+	var _objectAssign2 = _interopRequireDefault(_objectAssign);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	// polyfill below IE edge
+	Object.assign = Object.assign || function () {
+		var newObj = {};
+		_objectAssign2.default.apply(undefined, [newObj].concat(Array.prototype.slice.call(arguments)));
+		return newObj;
+	};
 	
 	var SERVER_URL = location.origin;
 	var SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
@@ -27967,6 +27978,51 @@
 
 /***/ },
 /* 221 */
+/***/ function(module, exports) {
+
+	/* eslint-disable no-unused-vars */
+	'use strict';
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+	
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+	
+		return Object(val);
+	}
+	
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
+	
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+	
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+	
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+	
+		return to;
+	};
+
+
+/***/ },
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -28043,7 +28099,7 @@
 								{ className: "row" },
 								_react2.default.createElement(
 									"div",
-									{ className: "col-xs-9" },
+									{ className: "col-xs-8" },
 									_react2.default.createElement("input", { type: "text",
 										style: { width: "100%" },
 										className: "form-control",
@@ -28053,7 +28109,7 @@
 								),
 								_react2.default.createElement(
 									"div",
-									{ className: "col-xs-3" },
+									{ className: "col-xs-4" },
 									_react2.default.createElement(
 										"button",
 										{ type: "button", className: "btn btn-primary btn-block", onClick: this.handleSend.bind(this) },
@@ -28073,7 +28129,7 @@
 	exports.default = ChatBox;
 
 /***/ },
-/* 222 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -28225,7 +28281,7 @@
 	exports.default = MessageBox;
 
 /***/ },
-/* 223 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";

@@ -1,7 +1,35 @@
 # NRChat
 NRChat represents Node React Chat, which is yet another web development practice.
 
-# Story
+# How to Run
+Visit [NRChat on Heroku](http://nrchat.herokuapp.com).
+
+Or run it locally:
+
+```bash
+$ clone https://github.com/zushenyan/NRChat.git
+$ cd NRChat
+$ node server/server
+$ open localhost:8080
+```
+
+# Tools Involved
+
+* HTML
+* CSS
+  * Bootstrap
+* JavaScript
+  * Node & Express
+  * Babel/ES6
+	* Webpack
+	* Gulp
+	* React
+	* Redux
+	* and tons of libs...
+* Redis
+* Heroku
+
+# Behind The Scene
 Originally I wanted to create an practice application with user authentication, but latter on, I cancelled this feature after thinking on some points.
 
 First, I realized **user authentication** is actually not an easy topic. Dealing with authentication involves lots of problems

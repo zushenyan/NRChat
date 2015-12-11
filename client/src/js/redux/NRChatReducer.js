@@ -1,4 +1,12 @@
 import io from "socket.io-client";
+import objectAssign from "object-assign";
+
+// polyfill below IE edge
+Object.assign = Object.assign || function(){
+	let newObj = {};
+	objectAssign(newObj, ...arguments);
+	return newObj;
+};
 
 const SERVER_URL = location.origin;
 const SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
