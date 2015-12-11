@@ -10,8 +10,9 @@ Or run it locally:
 $ clone https://github.com/zushenyan/NRChat.git
 $ cd NRChat
 $ node server/server
-$ open localhost:8080
 ```
+
+And go to `http://localhost:8080` with any browser you like.
 
 # Tools Involved
 
