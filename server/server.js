@@ -11,7 +11,6 @@ var route = express.Router();
 route.get("/", function(req, res, next){
 	var p = path.join(__dirname, "..", "client/dist/html/index.html");
 	res.sendFile(p);
-	// res.sendFile(__dirname + "/views/index.html");
 });
 
 route.get("/api/messages", function(req, res, next){

@@ -1,7 +1,12 @@
 import io from "socket.io-client";
 
-const SERVER_URL = "http://localhost:8080";
+const SERVER_URL = location.origin;
 const SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
+
+export const EVENT_HELLO = "hello";
+export const EVENT_CHAT = "chat";
+export const EVENT_BEFORE_DISCONNECT = "before disconnect";
+export const EVENT_ERROR = "error";
 
 // initial store
 let store = (function(){
@@ -9,7 +14,7 @@ let store = (function(){
 		username: "",
 		messages: [],
 		socket: null
-	}
+	};
 })();
 
 // action constants
@@ -21,45 +26,60 @@ const ACTION_FETCH_MESSAGES = "fetch messages";
 const ACTION_PUSH_MESSAGE = "push message";
 
 // actions
-export function setup(onChatFunc, onServerFunc){
+export function setup({onHello, onError, onChat, onBeforeDisconnect}){
 	return {
 		type: ACTION_SETUP,
-		onChatFunc: onChatFunc,
-		onServerFunc: onServerFunc
-	}
+		onHello,
+		onError,
+		onChat,
+		onBeforeDisconnect
+	};
 }
 
 export function setUsername(username){
 	return {
 		type: ACTION_SET_USERNAME,
-		username: username
-	}
+		username
+	};
 }
 
 export function sendMessage(message){
 	return {
 		type: ACTION_SEND_MESSAGE,
-		message: message
-	}
+		message
+	};
 };
 
 export function disconnect(){
 	return {
 		type: ACTION_DISCONNECT
-	}
+	};
 }
 
 export function fetchMessages(){
-	return {
-		type: ACTION_FETCH_MESSAGES,
-	}
+	return function(dispatch){
+		let ajax = new XMLHttpRequest();
+		ajax.addEventListener("load", function(){
+			let jsonMessages = [];
+			let rawMessages = JSON.parse(ajax.responseText);
+			rawMessages.forEach((ele) => {
+				jsonMessages.push(JSON.parse(ele));
+			});
+			dispatch({
+				type: ACTION_FETCH_MESSAGES,
+				messages: jsonMessages
+			});
+		});
+		ajax.open("GET", SERVER_FETCH_MESSAGE);
+		ajax.send();
+	};
 }
 
 export function pushMessage(message){
 	return {
 		type: ACTION_PUSH_MESSAGE,
-		message: message
-	}
+		message
+	};
 }
 
 // reducer
@@ -84,23 +104,23 @@ export function reducer(state = store, action){
 
 function _setup(state, action){
 	let socket = io.connect(SERVER_URL);
-	socket.on("chat message", action.onClientFunc);
-	socket.on("server message", action.onServerFunc);
+	socket.on(EVENT_HELLO, action.onHello);
+	socket.on(EVENT_CHAT, action.onChat);
+	socket.on(EVENT_BEFORE_DISCONNECT, action.onBeforeDisconnect);
+	socket.on(EVENT_ERROR, action.onError);
 	state.socket = socket;
 	return Object.assign(state, {
-		onChatFunc: action.onChatFunc,
-		onServerFunc: action.onServerFunc
+		onHello: action.onHello,
+		onChat: action.onChat,
+		onBeforeDisconnect: action.onBeforeDisconnect,
+		onError : action.onError
 	});
 }
 
 function _fetchMessages(state, action){
-	var ajax = new XMLHttpRequest();
-	ajax.addEventListener("load", function(){
-		state.messages = JSON.parse(ajax.responseText);
+	return Object.assign(state, {
+		messages: action.messages
 	});
-	ajax.open("GET", SERVER_FETCH_MESSAGE);
-	ajax.send();
-	return state;
 }
 
 function _pushMessage(state, action){
@@ -116,7 +136,7 @@ function _setUsername(state, action){
 		user: state.username,
 		id: state.socket.id
 	};
-	state.socket.emit("hello", data);
+	state.socket.emit(EVENT_HELLO, data);
 	return Object.assign(state, {
 		username: action.username
 	});
@@ -128,7 +148,7 @@ function _sendMessage(state, action){
 		message: action.message,
 		id: state.socket.id
 	};
-	state.socket.emit("chat message", data);
+	state.socket.emit(EVENT_CHAT, data);
 	return Object.assign(state, {
 		message: action.message
 	});
@@ -139,6 +159,6 @@ function _disconnect(state, action){
 		user: state.username,
 		id: state.socket.id
 	};
-	state.socket.emit("before disconnect", data);
+	state.socket.emit(EVENT_BEFORE_DISCONNECT, data);
 	return state;
 }

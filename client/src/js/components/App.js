@@ -39,6 +39,6 @@ ReactDOM.render(
 	document.getElementById("app")
 );
 
-document.addEventListener("beforeunload", (e) => {
+window.addEventListener("beforeunload", (e) => {
 	ReactDOM.unmountComponentAtNode(document.getElementById("app"));
 });

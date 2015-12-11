@@ -128,7 +128,7 @@
 	
 	_reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById("app"));
 	
-	document.addEventListener("beforeunload", function (e) {
+	window.addEventListener("beforeunload", function (e) {
 		_reactDom2.default.unmountComponentAtNode(document.getElementById("app"));
 	});
 
@@ -19828,18 +19828,36 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
+	var finalCreateStore = (0, _redux.applyMiddleware)(thunkMiddleware)(_redux.createStore);
+	
 	var combinedReducers = (0, _redux.combineReducers)({
 		NRChatReducer: NRChatReducer.reducer
 	});
 	
-	var store = (0, _redux.createStore)(combinedReducers);
+	var store = finalCreateStore(combinedReducers);
 	
 	// configure
-	store.dispatch(NRChatReducer.setup(pushMessage, pushMessage));
-	// store.dispatch(NRChatReducer.fetchMessages());
+	store.dispatch(NRChatReducer.setup({
+		onChat: sendMessage,
+		onError: sendMessage,
+		onHello: sendMessage,
+		onBeforeDisconnect: sendMessage
+	}));
 	
-	function pushMessage(data) {
+	function sendMessage(data, event) {
+		data.event = event;
 		store.dispatch(NRChatReducer.pushMessage(data));
+	}
+	
+	function thunkMiddleware(_ref) {
+		var dispatch = _ref.dispatch;
+		var getState = _ref.getState;
+	
+		return function (next) {
+			return function (action) {
+				return typeof action === "function" ? action(dispatch, action) : next(action);
+			};
+		};
 	}
 	
 	exports.default = store;
@@ -20437,6 +20455,7 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
+	exports.EVENT_ERROR = exports.EVENT_BEFORE_DISCONNECT = exports.EVENT_CHAT = exports.EVENT_HELLO = undefined;
 	exports.setup = setup;
 	exports.setUsername = setUsername;
 	exports.sendMessage = sendMessage;
@@ -20451,8 +20470,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var SERVER_URL = "http://localhost:8080";
+	var SERVER_URL = location.origin;
 	var SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
+	
+	var EVENT_HELLO = exports.EVENT_HELLO = "hello";
+	var EVENT_CHAT = exports.EVENT_CHAT = "chat";
+	var EVENT_BEFORE_DISCONNECT = exports.EVENT_BEFORE_DISCONNECT = "before disconnect";
+	var EVENT_ERROR = exports.EVENT_ERROR = "error";
 	
 	// initial store
 	var store = (function () {
@@ -20472,11 +20496,18 @@
 	var ACTION_PUSH_MESSAGE = "push message";
 	
 	// actions
-	function setup(onChatFunc, onServerFunc) {
+	function setup(_ref) {
+		var onHello = _ref.onHello;
+		var onError = _ref.onError;
+		var onChat = _ref.onChat;
+		var onBeforeDisconnect = _ref.onBeforeDisconnect;
+	
 		return {
 			type: ACTION_SETUP,
-			onChatFunc: onChatFunc,
-			onServerFunc: onServerFunc
+			onHello: onHello,
+			onError: onError,
+			onChat: onChat,
+			onBeforeDisconnect: onBeforeDisconnect
 		};
 	}
 	
@@ -20501,8 +20532,21 @@
 	}
 	
 	function fetchMessages() {
-		return {
-			type: ACTION_FETCH_MESSAGES
+		return function (dispatch) {
+			var ajax = new XMLHttpRequest();
+			ajax.addEventListener("load", function () {
+				var jsonMessages = [];
+				var rawMessages = JSON.parse(ajax.responseText);
+				rawMessages.forEach(function (ele) {
+					jsonMessages.push(JSON.parse(ele));
+				});
+				dispatch({
+					type: ACTION_FETCH_MESSAGES,
+					messages: jsonMessages
+				});
+			});
+			ajax.open("GET", SERVER_FETCH_MESSAGE);
+			ajax.send();
 		};
 	}
 	
@@ -20538,23 +20582,23 @@
 	
 	function _setup(state, action) {
 		var socket = _socket2.default.connect(SERVER_URL);
-		socket.on("chat message", action.onClientFunc);
-		socket.on("server message", action.onServerFunc);
+		socket.on(EVENT_HELLO, action.onHello);
+		socket.on(EVENT_CHAT, action.onChat);
+		socket.on(EVENT_BEFORE_DISCONNECT, action.onBeforeDisconnect);
+		socket.on(EVENT_ERROR, action.onError);
 		state.socket = socket;
 		return Object.assign(state, {
-			onChatFunc: action.onChatFunc,
-			onServerFunc: action.onServerFunc
+			onHello: action.onHello,
+			onChat: action.onChat,
+			onBeforeDisconnect: action.onBeforeDisconnect,
+			onError: action.onError
 		});
 	}
 	
 	function _fetchMessages(state, action) {
-		var ajax = new XMLHttpRequest();
-		ajax.addEventListener("load", function () {
-			state.messages = JSON.parse(ajax.responseText);
+		return Object.assign(state, {
+			messages: action.messages
 		});
-		ajax.open("GET", SERVER_FETCH_MESSAGE);
-		ajax.send();
-		return state;
 	}
 	
 	function _pushMessage(state, action) {
@@ -20570,7 +20614,7 @@
 			user: state.username,
 			id: state.socket.id
 		};
-		state.socket.emit("hello", data);
+		state.socket.emit(EVENT_HELLO, data);
 		return Object.assign(state, {
 			username: action.username
 		});
@@ -20582,7 +20626,7 @@
 			message: action.message,
 			id: state.socket.id
 		};
-		state.socket.emit("chat message", data);
+		state.socket.emit(EVENT_CHAT, data);
 		return Object.assign(state, {
 			message: action.message
 		});
@@ -20593,7 +20637,7 @@
 			user: state.username,
 			id: state.socket.id
 		};
-		state.socket.emit("before disconnect", data);
+		state.socket.emit(EVENT_BEFORE_DISCONNECT, data);
 		return state;
 	}
 
@@ -28132,28 +28176,44 @@
 			_this3.state = {
 				messages: []
 			};
-			// Store.dispatch(ChatAction.onChatMessage(this.onChatMessage.bind(this)));
-			// Store.dispatch(ChatAction.onServerMessage(this.onServerMessage.bind(this)));
+			_MainReducer2.default.subscribe(_this3.fetchMessages.bind(_this3));
+			_MainReducer2.default.dispatch(ChatAction.fetchMessages());
 			return _this3;
 		}
 	
 		_createClass(MessageBox, [{
 			key: "fetchMessages",
-			value: function fetchMessages() {}
-		}, {
-			key: "onChatMessage",
-			value: function onChatMessage() {}
-		}, {
-			key: "onServerMessage",
-			value: function onServerMessage() {}
+			value: function fetchMessages() {
+				this.setState({
+					messages: _MainReducer2.default.getState().NRChatReducer.messages
+				});
+			}
 		}, {
 			key: "render",
 			value: function render() {
+				var messageNodes = [];
+				this.state.messages.forEach(function (ele, index) {
+					var messageNode = null;
+					switch (ele.event) {
+						case ChatAction.EVENT_HELLO:
+							messageNode = _react2.default.createElement(ServerMessage, { message: ele.user + " has joined the room.", key: index });
+							break;
+						case ChatAction.EVENT_BEFORE_DISCONNECT:
+							messageNode = _react2.default.createElement(ServerMessage, { message: ele.user + " has left the room.", key: index });
+							break;
+						case ChatAction.EVENT_ERROR:
+							messageNode = _react2.default.createElement(ServerMessage, { message: ele.message, key: index });
+							break;
+						case ChatAction.EVENT_CHAT:
+						default:
+							messageNode = _react2.default.createElement(ChatMessage, { user: ele.user, message: ele.message, key: index });
+					}
+					messageNodes.push(messageNode);
+				});
 				return _react2.default.createElement(
 					"div",
 					{ className: "container-fluid" },
-					_react2.default.createElement(ChatMessage, { user: "dog", message: "woof" }),
-					_react2.default.createElement(ServerMessage, { message: "you are too ugly to text!" })
+					messageNodes
 				);
 			}
 		}]);

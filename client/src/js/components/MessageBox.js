@@ -38,27 +38,39 @@ export default class MessageBox extends React.Component{
 		this.state = {
 			messages: []
 		};
-		// Store.dispatch(ChatAction.onChatMessage(this.onChatMessage.bind(this)));
-		// Store.dispatch(ChatAction.onServerMessage(this.onServerMessage.bind(this)));
+		Store.subscribe(this.fetchMessages.bind(this));
+		Store.dispatch(ChatAction.fetchMessages());
 	}
 
 	fetchMessages(){
-
-	}
-
-	onChatMessage(){
-
-	}
-
-	onServerMessage(){
-
+		this.setState({
+			messages: Store.getState().NRChatReducer.messages
+		});
 	}
 
 	render(){
+		let messageNodes = [];
+		this.state.messages.forEach((ele, index) => {
+			let messageNode = null;
+			switch(ele.event){
+				case ChatAction.EVENT_HELLO:
+					messageNode = (<ServerMessage message={ele.user + " has joined the room."} key={index} />);
+					break;
+				case ChatAction.EVENT_BEFORE_DISCONNECT:
+					messageNode = (<ServerMessage message={ele.user + " has left the room."} key={index} />);
+					break;
+				case ChatAction.EVENT_ERROR:
+					messageNode = (<ServerMessage message={ele.message} key={index} />);
+					break;
+				case ChatAction.EVENT_CHAT:
+				default:
+					messageNode = (<ChatMessage user={ele.user} message={ele.message} key={index} />);
+			}
+			messageNodes.push(messageNode);
+		});
 		return (
 			<div className="container-fluid">
-				<ChatMessage user="dog" message="woof" />
-				<ServerMessage message="you are too ugly to text!" />
+				{messageNodes}
 			</div>
 		);
 	}

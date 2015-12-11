@@ -3,8 +3,8 @@ var db = require("./database");
 
 var EVENT_HELLO = "hello";
 var EVENT_BEFORE_DISCONNECT = "before disconnect";
-var EVENT_CHAT_MESSAGE = "chat message";
-var EVENT_SERVER_MESSAGE = "server message";
+var EVENT_CHAT = "chat";
+var EVENT_ERROR = "error";
 
 io.on("connection", function(socket){
 	handleConnect(socket);
@@ -20,38 +20,31 @@ function handleConnect(socket){
 function registerHelloEvent(socket){
 	socket.on(EVENT_HELLO, function(data){
 		if(!isValidData(data, checkUser)){ return; }
-		var username = makeName(data);
-		console.log(username + " has joined");
-		data.message = username + " has joined the room.";
-		data.from = "server";
-		broadcastMessage(EVENT_SERVER_MESSAGE, data);
+		console.log(makeName(data) + " has joined");
+		broadcastMessage(EVENT_HELLO, data);
 	});
 }
 
 function registerBeforeDisconnectEvent(socket){
 	socket.on(EVENT_BEFORE_DISCONNECT, function(data){
 		if(!data.user){ return; }
-		var username = makeName(data);
-		console.log(username + " has disconnected");
-		data.message = username + " has left the room.";
-		data.from = "server";
-		broadcastMessage(EVENT_SERVER_MESSAGE, data);
+		console.log(makeName(data) + " has disconnected");
+		broadcastMessage(EVENT_BEFORE_DISCONNECT, data);
 	});
 }
 
 function registerTransferMessageEvent(socket){
-	socket.on(EVENT_CHAT_MESSAGE, function(data){
+	socket.on(EVENT_CHAT, function(data){
 		if(!isValidData(data, checkUser)){ return; }
 		if(!isValidData(data, checkMessage)){ return; }
 		console.log(makeName(data) + " : " + data.message);
-		data.from = "client";
 		db.saveMessage(data);
-		broadcastMessage(EVENT_CHAT_MESSAGE, data);
+		broadcastMessage(EVENT_CHAT, data);
 	});
 }
 
 function broadcastMessage(event, data){
-	io.emit(event, data);
+	io.emit(event, data, event);
 }
 
 function makeName(data){
@@ -62,7 +55,7 @@ function isValidData(data, checkWhatFunc){
 	var response = {};
 	checkWhatFunc(data, response);
 	if(response.message){
-		io.to(data.id).emit(EVENT_SERVER_MESSAGE, response);
+		io.to(data.id).emit(EVENT_ERROR, response);
 		return false;
 	}
 	return true;
