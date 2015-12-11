@@ -49,6 +49,7 @@ export default class MessageBox extends React.Component{
 	}
 
 	render(){
+		window.scrollTo(0, document.body.scrollHeight);
 		let messageNodes = [];
 		this.state.messages.forEach((ele, index) => {
 			let messageNode = null;

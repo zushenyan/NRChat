@@ -28191,6 +28191,7 @@
 		}, {
 			key: "render",
 			value: function render() {
+				window.scrollTo(0, document.body.scrollHeight);
 				var messageNodes = [];
 				this.state.messages.forEach(function (ele, index) {
 					var messageNode = null;
