@@ -22,11 +22,11 @@ And go to `http://localhost:8080` with any browser you like.
 * JavaScript
   * Node & Express
   * Babel/ES6
-	* Webpack
-	* Gulp
-	* React
-	* Redux
-	* and tons of libs...
+  * Webpack
+  * Gulp
+  * React
+  * Redux
+  * and tons of libs...
 * Redis
 * Heroku
 
