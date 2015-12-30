@@ -15,6 +15,10 @@ var UserSchema = new mongoose.Schema({
 	}
 });
 
+UserSchema.methods.checkPassword = function(password){
+	return bcrypt.compareSync(password, this.password);
+};
+
 UserSchema.pre("save", function(next){
 	this.password = bcrypt.hashSync(this.password, 10);
 	next();

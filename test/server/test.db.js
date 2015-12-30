@@ -3,110 +3,139 @@ var db = require("../../server/db/db");
 var User = require("../../server/db/user");
 var Message = require("../../server/db/message");
 
-function printUser(err, result){
-	if(err){return console.log(err);}
-	console.log(result);
-}
-
-var user1 = new User({
+var user1 = {
 	username: "aaaa",
 	password: "abcd"
-});
-var user2 = new User({
+};
+var user2 = {
 	username: "bbbb",
 	password: "1234"
-});
-var user3 = new User({
+};
+var user3 = {
 	username: "cccc",
 	password: "ggyy"
-});
+};
 var users = [user1, user2, user3];
 
-var message1 = new Message({
+var message1 = {
 	who: "ggyy",
 	body: "hello there"
-});
-var message2 = new Message({
+};
+var message2 = {
 	who: "not so gy",
 	body: "hi"
-});
-var message3 = new Message({
+};
+var message3 = {
 	who: "very gy",
 	body: "fuck you all"
-});
+};
 var messages = [message1, message2, message3];
 
 describe("Test db functionalities", function(){
-	beforeEach(function(){
-		User.find({}).remove().exec();
-		Message.find({}).remove().exec();
-		users.forEach(function(ele){
-			ele.save();
+	beforeEach("resetUsers", function(done){
+		User.find({}).remove().exec(function(){
+			User.create(users, function(){
+				done();
+			});
 		});
-		messages.forEach(function(ele){
-			ele.save();
+	});
+
+	beforeEach("resetMessage", function(done){
+		Message.find({}).remove().exec(function(){
+			Message.create(messages, function(){
+				done();
+			});
 		});
 	});
 
 	describe("getUsers", function(){
-		it("should work", function(){
-			var expectResult = [];
+		it("should work", function(done){
+			var expectResults = [];
 			users.forEach(function(ele){
-				expectResult.push({username: ele.username});
+				expectResults.push({username: ele.username});
 			});
 			db.getUsers(function(err, docs){
-				if(err){throw new Error(err);}
-				expect(docs).to.eql(expectResult);
+				if(err){return done(err);}
+				var target = [];
+				docs.forEach(function(ele){
+					target.push({username: ele.username});
+				});
+				expect(target).to.eql(expectResults);
+				done();
 			});
 		});
 	});
 
 	describe("createUser", function(){
-		it("should work", function(){
-			db.createUser("dddd", "qweqwe", function(err, docs){
-				if(err){throw new Error(err);}
-				expect(docs).to.eql([{username: validUser.username}]);
+		it("should work", function(done){
+			db.createUser("dddd", "qweqwe", function(err, doc){
+				if(err){return done(err);}
+				var target = {username: doc.username};
+				expect(target).to.eql({username: "dddd"});
+				done();
 			});
 		});
-		it("should throw", function(){
-			function exec1(){
-				db.createUser("1", "qweqwe", function(err){
-					expect(err).not.to.be.null;
-				});
-			}
-			function exec2(){
-				db.createUser("1234", "q", function(err){
-					expect(err).not.to.be.null;
-				});
-			}
-			exec1();
-			exec2();
+		it("should throw when username is too short", function(done){
+			db.createUser("1", "qweqwe", function(err){
+				expect(err).not.to.be.null;
+				done();
+			});
+		});
+		it("should throw when password is too short", function(done){
+			db.createUser("1234", "q", function(err){
+				expect(err).not.to.be.null;
+				done();
+			});
+		});
+		it("should have error when duplicate username", function(done){
+			db.createUser("aaaa", "anotherpassword", function(err){
+				expect(err).not.to.be.null;
+				done();
+			});
 		});
 	});
 
 	describe("getMessages", function(){
-		it("should work", function(){
-			var expectResult = [];
+		it("should work", function(done){
+			var expectResults = [];
 			messages.forEach(function(ele){
-				expectResult.push({who: ele.who, message: ele.message});
+				expectResults.push({who: ele.who, body: ele.body});
 			});
 			db.getMessages(function(err, docs){
-				if(err){throw new Error(err);}
-				expect(docs).to.eql(expectResult);
+				if(err){return done(err);}
+				var target = [];
+				docs.forEach(function(ele){
+					target.push({
+						who: ele.who,
+						body: ele.body
+					});
+				});
+				expect(target).to.eql(expectResults);
+				done();
 			});
 		});
 	});
 
 	describe("createMessage", function(){
-		it("should work", function(){
+		it("should work", function(done){
 			var message = {
 				who: "i am a cat",
-				body: "meowmeowmeow"
+				body: "meowmeowmeow",
+				date: new Date(Date.now())
 			}
-			db.createMessage(message.who, message.body);
-			Message.find({who: message.who, body: message.body}).exec(function(err, docs){
-				if(err){throw new Error(err)};
-				expect(docs).to.eql([message]);
+			db.createMessage(message.who, message.body, message.date);
+			Message.find({who: message.who, body: message.body, date: message.date}).exec(function(err, docs){
+				if(err){return done(err)};
+				var target = [];
+				docs.forEach(function(ele){
+					target.push({
+						who: ele.who,
+						body: ele.body,
+						date: ele.date
+					});
+				});
+				expect(target).to.eql([message]);
+				done();
 			});
 		});
 	});
