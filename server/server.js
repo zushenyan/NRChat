@@ -1,34 +1,53 @@
 var bodyParser = require("body-parser");
 var express = require("express");
+var cookieParser = require("cookie-parser");
+var session = require("express-session");
 var path = require("path");
-var db = require("./database");
-var io = require("./socket");
+var flash = require("connect-flash");
+var io = require("./socket/socket");
+
+var passport = require("./mypassport");
+var api = require("./api");
+var site = require("./site");
 
 var PORT = process.env.PORT || 8080;
 
-var route = express.Router();
-
-route.get("/", function(req, res, next){
-	var p = path.join(__dirname, "..", "client/dist/html/index.html");
-	res.sendFile(p);
-});
-
-route.get("/api/messages", function(req, res, next){
-	db.getMessages(function(err, reply){
-		if(err){
-			console.log(err);
-		}
-		res.json(reply);
-	});
-});
-
-var server = express()
-	.use(express.static(path.join(__dirname, "..", "client/dist")))
-	.use(bodyParser.urlencoded({ extended: false }))
+var handler = express()
+	// .use(express.static(path.join(__dirname, "..", "server/view")))
+	.use(bodyParser.urlencoded({ extended: true }))
 	.use(bodyParser.json())
-	.use(route)
-	.listen(PORT, function(){
-		console.log("server is listening on " + PORT);
-	});
+	.use(cookieParser())
+	.use(session({
+		secret: "shhhhh i am a secret",
+		resave: false,
+		saveUninitialized: true
+	}))
+	.use(flash())
+	.use(passport.initialize())
+	.use(passport.session())
+	.use(site)
+	.use(api);
 
-io.listen(server);
+var server;
+
+if(process.argv.length < 3){
+	open();
+}
+else {
+	module.exports = {
+		open: open,
+		close: close
+	};
+}
+
+function open(){
+	server = handler.listen(PORT, function(){
+		console.log("server is running...");
+	});
+	io.listen(server);
+}
+
+function close(callback){
+	io.httpServer.close();
+	callback();
+}

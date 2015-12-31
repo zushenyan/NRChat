@@ -4,5 +4,4 @@ module.exports = {
 	INDEX: "/",
 	LOGIN: "/login",
 	LOGOUT: "/logout",
-	SIGNUP: "/signup"
 };
