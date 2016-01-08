@@ -1,7 +1,7 @@
 import React from "react";
 
-import Store from "../redux/MainReducer";
-import * as ChatAction from "../redux/NRChatReducer";
+import Store from "../reducers/MainReducer";
+import * as Actions from "../actions/Actions";
 
 class ServerMessage extends React.Component{
 	constructor(props){
@@ -38,14 +38,14 @@ export default class MessageBox extends React.Component{
 		this.state = {
 			messages: []
 		};
-		Store.subscribe(this.fetchMessages.bind(this));
-		Store.dispatch(ChatAction.fetchMessages());
+		// Store.subscribe(this.fetchMessages.bind(this));
+		// Store.dispatch(ChatAction.fetchMessages());
 	}
 
 	fetchMessages(){
-		this.setState({
-			messages: Store.getState().NRChatReducer.messages
-		});
+		// this.setState({
+		// 	messages: Store.getState().NRChatReducer.messages
+		// });
 	}
 
 	render(){

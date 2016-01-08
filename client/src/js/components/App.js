@@ -1,13 +1,30 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import {Router, Route, Link, IndexLink, browserHistory, IndexRoute} from "react-router";
+import createBrowserHistory from "history/lib/createBrowserHistory";
 
 import NavBar from "./NavBar";
 import ChatBox from "./ChatBox";
 import MessageBox from "./MessageBox";
-import Dialog from "./Dialog";
+import Login from "./Login";
 
-import Store from "../redux/MainReducer";
-import * as ChatAction from "../redux/NRChatReducer";
+import Store from "../reducers/MainReducer";
+import * as Actions from "../actions/Actions";
+
+class MainView extends React.Component{
+	constructor(props){
+		super(props);
+	}
+
+	render(){
+		return (
+			<div>
+				<MessageBox />
+				<ChatBox />
+			</div>
+		);
+	}
+}
 
 class App extends React.Component{
 	constructor(props){
@@ -15,27 +32,31 @@ class App extends React.Component{
 	}
 
 	componentDidMount(){
-		$("#nameDialog").modal("show");
+		// $("#nameDialog").modal("show");
 	}
 
 	componentWillUnmount(){
-		Store.dispatch(ChatAction.disconnect());
+		// Store.dispatch(ChatAction.disconnect());
 	}
 
 	render(){
 		return (
 			<div>
 				<NavBar />
-				<MessageBox />
-				<ChatBox />
-				<Dialog id="nameDialog"/>
+				{this.props.children}
 			</div>
 		);
 	}
 }
 
 ReactDOM.render(
-	<App />,
+	<Router history={ createBrowserHistory() }>
+		<Route path="/" component={ App }>
+			<IndexRoute component={ MainView } />
+			<Route path="/login" component={ Login } />
+		</Route>
+	</Router>
+	,
 	document.getElementById("app")
 );
 

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>register</title>
+	</head>
+	<body>
+		<form action="/login" method="post" id="loginForm">
+			<label for="username">username</label>
+			<input type="text" name="username">
+			<label for="password">password</label>
+			<input type="password" name="password">
+			<input type="submit" value="submit">
+		</form>
+
+		<form action="/register" method="post" id="registerForm">
+			<label for="username">username</label>
+			<input type="text" name="username">
+			<label for="password">password</label>
+			<input type="password" name="password">
+			<input type="submit" value="submit">
+		</form>
+		<script>
+			window.addEventListener("DOMContentLoaded", function(){
+				var loginForm = document.getElementById("loginForm");
+				var registerForm = document.getElementById("registerForm");
+				loginForm.addEventListener("submit", function(e){
+					e.preventDefault();
+					var data = {
+						username: loginForm.username.value,
+						password: loginForm.password.value
+					};
+					ajax(loginForm.method, loginForm.action, JSON.stringify(data));
+				});
+				registerForm.addEventListener("submit", function(e){
+					e.preventDefault();
+					var data = {
+						username: registerForm.username.value,
+						password: registerForm.password.value,
+					};
+					ajax(registerForm.method, registerForm.action, JSON.stringify(data));
+				});
+			});
+
+			function ajax(method, url, data){
+				var ajax = new XMLHttpRequest();
+				ajax.addEventListener("load", function(){
+					var data = JSON.parse(ajax.responseText);
+					if(data.redirect){
+						window.location = data.location
+					}
+					else{
+						console.log(data.message);
+					}
+				});
+				ajax.open(method, url);
+				if(method.toUpperCase() === "POST"){
+					ajax.setRequestHeader("Content-Type", "application/json");
+				}
+				ajax.send(data);
+			}
+		</script>
+	</body>
+</html>

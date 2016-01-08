@@ -19,7 +19,7 @@ export default class Dialog extends React.Component{
 		let username = document.getElementById("usernameInput").value;
 		if(username){
 			$("#" + this.props.id).modal("hide");
-			Store.dispatch(ChatAction.setUsername(username));
+			// Store.dispatch(ChatAction.setUsername(username));
 		}
 	}
 

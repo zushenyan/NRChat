@@ -1,4 +1,7 @@
 body {
   padding: 70px 0; }
 
+.nav > li > a {
+  padding: 6px 12px; }
+
 /*# sourceMappingURL=style.css.map*/

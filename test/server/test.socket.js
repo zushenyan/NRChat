@@ -111,7 +111,7 @@ describe("test socket", function(){
 			});
 
 			client3.on(socketEvent.ERROR, function(data){
-				expect(data).to.eql("'who', 'body' and 'id' fields can be empty.");
+				expect(data).to.eql("'who', 'body' and 'id' fields can't be empty.");
 				client3.disconnect();
 				done();
 			});

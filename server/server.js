@@ -8,12 +8,12 @@ var io = require("./socket/socket");
 
 var passport = require("./mypassport");
 var api = require("./api");
-var site = require("./site");
+var routes = require("./routes");
 
 var PORT = process.env.PORT || 8080;
 
 var handler = express()
-	// .use(express.static(path.join(__dirname, "..", "server/view")))
+	.use(express.static(path.join(__dirname, "..", "client/dist/")))
 	.use(bodyParser.urlencoded({ extended: true }))
 	.use(bodyParser.json())
 	.use(cookieParser())
@@ -25,7 +25,7 @@ var handler = express()
 	.use(flash())
 	.use(passport.initialize())
 	.use(passport.session())
-	.use(site)
+	.use(routes)
 	.use(api);
 
 var server;

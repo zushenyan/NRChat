@@ -1,7 +1,7 @@
 import React from "react";
 
-import Store from "../redux/MainReducer";
-import * as ChatAction from "../redux/NRChatReducer";
+import Store from "../reducers/MainReducer";
+import * as Actions from "../actions/Actions";
 
 export default class ChatBox extends React.Component{
 	constructor(props){
@@ -19,7 +19,7 @@ export default class ChatBox extends React.Component{
 		let messageInput = document.getElementById("messageInput");
 		let message = messageInput.value;
 		if(message && message !== ""){
-			Store.dispatch(ChatAction.sendMessage(message));
+			// Store.dispatch(ChatAction.sendMessage(message));
 			messageInput.value = "";
 		}
 	}

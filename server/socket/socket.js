@@ -67,7 +67,7 @@ function registerChatEvent(socket){
 
 function isValidData(data){
 	if(!clientMessage.isValid(data)){
-		io.to(data.id).emit(socketEvent.ERROR, "'who', 'body' and 'id' fields can be empty.");
+		io.to(data.id).emit(socketEvent.ERROR, "'who', 'body' and 'id' fields can't be empty.");
 		return false;
 	}
 	return true;
