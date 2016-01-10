@@ -1,8 +1,5 @@
-var mongoose = require("mongoose");
 var User = require("./user");
 var Message = require("./message");
-
-mongoose.connect("mongodb://localhost:27017");
 
 var db = {};
 
@@ -22,7 +19,7 @@ db.createUser = function(username, password, callback){
 
 db.getMessages = function(callback){
 	Message.find({})
-		.select({_id: false})
+		.select({_id: false, __v: false})
 		.exec(callback);
 };
 

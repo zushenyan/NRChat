@@ -1,19 +1,10 @@
-function ClientMessage(who, body, id){
+function ClientMessage(who, body){
 	this.who = who;
 	this.body = body;
-	this.id = id;
 }
-
-ClientMessage.prototype.toJson = function(){
-	return JSON.stringify(this);
-};
 
 ClientMessage.isValid = function(data){
-	return data.who && data.body && data.id;
+	return data.who && data.body;
 };
-
-function throwError(message){
-	throw new Error(message);
-}
 
 module.exports = ClientMessage;

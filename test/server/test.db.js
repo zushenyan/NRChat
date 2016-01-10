@@ -1,4 +1,5 @@
 var expect = require("chai").expect;
+var mongoose = require("mongoose");
 var db = require("../../server/db/db");
 var User = require("../../server/db/user");
 var Message = require("../../server/db/message");
@@ -32,6 +33,15 @@ var message3 = {
 var messages = [message1, message2, message3];
 
 describe("Test db functionalities", function(){
+	before("start mongodb", function(done){
+		mongoose.connect("mongodb://localhost:27017");
+		done();
+	});
+
+	after("cloes mongodb", function(done){
+		mongoose.disconnect(done);
+	});
+
 	beforeEach("resetUsers", function(done){
 		User.find({}).remove().exec(function(){
 			User.create(users, function(){

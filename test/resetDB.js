@@ -29,12 +29,15 @@ var messages = [
 	}
 ];
 
-function resetDB(callback){
+function resetDB(callback, disconnectOnEnd){
+	disconnectOnEnd = (disconnectOnEnd === true || disconnectOnEnd === false) ? disconnectOnEnd : true;
+	if(!mongoose.connection.db){ mongoose.connect("mongodb://localhost:27017"); }
 	User.find({}).remove().exec(function(){
 		Message.find({}).remove().exec(function(){
 			User.create(users, function(){
 				Message.create(messages, function(){
-					mongoose.disconnect(callback);
+					if(disconnectOnEnd){ mongoose.disconnect(callback); }
+					else{ callback(); }
 					console.log("reset DB done");
 				})
 			});

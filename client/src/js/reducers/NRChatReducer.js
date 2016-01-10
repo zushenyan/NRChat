@@ -1,26 +1,27 @@
 import io from "socket.io-client";
 import _ from "lodash";
-import socketEvent from "../../../../server/socket/socketEvent";
+import SocketEvent from "../../../../server/socket/socketEvent";
 import ClientMessage from "../../../../server/socket/clientMessage";
 import * as Actions from "../actions/Actions";
 import * as env from "../env/Environment";
 
-// initial store
-let store = (function(){
-	return {
-		username: "",
-		messages: [],
-		socket: null
-	};
-})();
+const INITIAL_STATE = {
+	username: "",
+	authorized: false,
+	messageHistory: [],
+	socket: null
+};
 
-// reducer
-export default function reducer(state = store, action){
+export function createState(){
+	return _.assign({}, INITIAL_STATE);
+};
+
+export function reducer(state = createState(), action){
 	switch(action.type){
 		case Actions.SETUP:
 			return _setup(state, action);
-		case Actions.FETCH_MESSAGES:
-			return _fetchMessages(state, action);
+		case Actions.RECEIVE_MESSAGE_HISTORY:
+			return _receiveMessageHistory(state, action);
 		case Actions.RECEIVE_MESSAGE:
 			return _receiveMessage(state, action);
 		case Actions.SEND_JOIN_INFO:
@@ -31,6 +32,8 @@ export default function reducer(state = store, action){
 			return _sendLeaveInfo(state, action);
 		case Actions.SET_USERNAME:
 			return _setUsername(state, action);
+		case Actions.LOGIN:
+			return _login(state, action);
 		default:
 			return state;
 	}
@@ -38,55 +41,56 @@ export default function reducer(state = store, action){
 
 function _setup(state, action){
 	let socket = io.connect(env.SERVER_URL, { "force new connection": true });
-	socket.on(socketEvent.JOIN, action.onJoin);
-	socket.on(socketEvent.CHAT, action.onChat);
-	socket.on(socketEvent.LEAVE, action.onLeave);
-	socket.on(socketEvent.ERROR, action.onError);
-	state.socket = socket;
-	return _.assign(state, {
+	socket.on(SocketEvent.JOIN, action.onJoin);
+	socket.on(SocketEvent.CHAT, action.onChat);
+	socket.on(SocketEvent.LEAVE, action.onLeave);
+	socket.on(SocketEvent.ERROR, action.onError);
+	return _.assign({}, state, {
 		onJoin: action.onJoin,
 		onChat: action.onChat,
 		onLeave: action.onLeave,
-		onError: action.onError
+		onError: action.onError,
+		socket: socket
 	});
 }
 
-function _fetchMessages(state, action){
-	return _.assign(state, {
-		messages: action.messages
+function _receiveMessageHistory(state, action){
+	return _.assign({}, state, {
+		messageHistory: action.messageHistory
 	});
 }
 
 function _receiveMessage(state, action){
-	state.messages.push(action.message);
-	return _.assign(state, {
-		message: action.message
+	let messageHistory = state.messageHistory.slice(0);
+	messageHistory.push(action.message);
+	return _.assign({}, state, {
+		messageHistory: messageHistory
 	});
 }
 
 function _sendJoinInfo(state, action){
-	let data = new ClientMessage(state.username, "hi", state.socket.id).toJson;
-	state.socket.emit(socketEvent.JOIN, data);
+	state.socket.emit(SocketEvent.JOIN, new ClientMessage(state.username, "hi"));
 	return state;
 }
 
 function _sendMessage(state, action){
-	let data = new ClientMessage(state.username, action.message, state.socket.id).toJson;
-	state.socket.emit(socketEvent.CHAT, data);
-	return _.assign(state, {
-		message: action.message
-	});
+	state.socket.emit(SocketEvent.CHAT, new ClientMessage(state.username, action.message));
+	return state;
 }
 
 function _sendLeaveInfo(state, action){
-	let data = new ClientMessage(state.username, "bye", state.socket.id).toJson;
-	state.socket.emit(socketEvent.LEAVE, data);
+	state.socket.emit(SocketEvent.LEAVE, new ClientMessage(state.username, "bye"));
 	return state;
 }
 
 function _setUsername(state, action){
-	state.username = action.username;
-	return _.assign(state, {
-		username: state.username
+	return _.assign({}, state, {
+		username: action.username
+	});
+}
+
+function _login(state, action){
+	return _.assign({}, state, {
+		username: action.username
 	});
 }

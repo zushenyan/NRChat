@@ -1,10 +1,11 @@
 var expect = require("chai").expect;
 var ioClient = require("socket.io-client");
+var mongoose = require("mongoose");
+
 var ioServer = require("../../server/socket/socket");
-var socketEvent = require("../../server/socket/socketEvent");
+var SocketEvent = require("../../server/socket/socketEvent");
 var ClientMessage = require("../../server/socket/clientMessage");
 var resetDB = require("../resetDB");
-var mongoose = require("mongoose");
 var User = require("../../server/db/user");
 var Message = require("../../server/db/message");
 
@@ -14,7 +15,7 @@ function createClient(){
 	var socket = ioClient.connect(URL, {
 		"force new connection": true
 	});
-	socket.on(socketEvent.ERROR, function(data){
+	socket.on(SocketEvent.ERROR, function(data){
 		throw new Error(data);
 	});
 	return socket;
@@ -45,34 +46,35 @@ describe("test socket", function(){
 
 	describe("test communication functions", function(){
 		it("should broadcast join event", function(done){
-			client1.on(socketEvent.JOIN, function(data){
-				expect(data).to.eql("cat has joined the room.")
+			client1.on(SocketEvent.JOIN, function(data){
+				delete data.date;
+				expect(data).to.eql({who: "cat", body: "has joined the room.", event: SocketEvent.JOIN})
 				done();
 			});
 
 			client2.on("connect", function(){
-				client2.emit(socketEvent.JOIN, new ClientMessage("cat", "hello", client1.id).toJson());
+				client2.emit(SocketEvent.JOIN, new ClientMessage("cat", "hello"));
 			});
 		});
 
 		it("should broadcast leave event", function(done){
-			client1.on(socketEvent.LEAVE, function(data){
-				expect(data).to.eql("cat has left the room.")
+			client1.on(SocketEvent.LEAVE, function(data){
+				delete data.date;
+				expect(data).to.eql({who: "cat", body: "has left the room.", event: SocketEvent.LEAVE})
 				done();
 			});
 
 			client2.on("connect", function(){
-				client2.emit(socketEvent.LEAVE, new ClientMessage("cat", "bye", client2.id).toJson());
+				client2.emit(SocketEvent.LEAVE, new ClientMessage("cat", "bye"));
 			});
 		});
 
 		it("should broadcast chat event", function(done){
 			var message = new ClientMessage("cat", "i am a cat watch me meowmeowmeowmeowmeowmeow!");
 
-			client1.on(socketEvent.CHAT, function(data){
+			client1.on(SocketEvent.CHAT, function(data){
 				expect(data.who).to.eql(message.who);
 				expect(data.body).to.eql(message.body);
-				expect(data.id).to.eql(client2.id);
 
 				Message.find({who: message.who, body: message.body}, function(err, docs){
 					if(err){throw new Error(err);}
@@ -93,31 +95,31 @@ describe("test socket", function(){
 
 			client2.on("connect", function(){
 				message.id = client2.id;
-				client2.emit(socketEvent.CHAT, message.toJson());
+				client2.emit(SocketEvent.CHAT, message);
 			});
 		});
 
 		it("should send error to the one who mess up", function(done){
 			var client3 = ioClient.connect(URL, { "force new connection": true });
 
-			client1.on(socketEvent.CHAT, function(data){
+			client1.on(SocketEvent.CHAT, function(data){
 				expect(data).to.be.null;
 				done();
 			});
 
-			client2.on(socketEvent.CHAT, function(data){
+			client2.on(SocketEvent.CHAT, function(data){
 				expect(data).to.be.null;
 				done();
 			});
 
-			client3.on(socketEvent.ERROR, function(data){
-				expect(data).to.eql("'who', 'body' and 'id' fields can't be empty.");
+			client3.on(SocketEvent.ERROR, function(data){
+				expect(data.body).to.eql("'who' and 'body' fields can't be empty.");
 				client3.disconnect();
 				done();
 			});
 
 			client3.on("connect", function(){
-				client3.emit(socketEvent.CHAT, new ClientMessage("bad user", "", client3.id).toJson());
+				client3.emit(SocketEvent.CHAT, new ClientMessage("bad user", ""));
 			});
 		});
 	});

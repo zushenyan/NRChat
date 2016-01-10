@@ -1,9 +1,11 @@
 module.exports = {
 	API_MESSAGES: "/api/messages",
 
+	// pages
 	INDEX: "/",
-	SIGN: "/sign",
+	// SIGN: "/sign",
 
+	// POST
 	LOGIN: "/login",
 	LOGOUT: "/logout",
 	REGISTER: "/register"

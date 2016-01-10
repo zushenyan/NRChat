@@ -1,26 +1,23 @@
 var io = require("socket.io")();
 var db = require("../db/db");
-var socketEvent = require("./socketEvent");
-var clientMessage = require("./clientMessage");
+var SocketEvent = require("./socketEvent");
+var ClientMessage = require("./clientMessage");
+var ServerMessage = require("./serverMessage");
 
 /* client sent chat message format
 {
 	who: "ggyy",
 	body: "hello how are you"
-	id: "this socket's ID"
 }
 */
 
-/* server sent chat message format
+/* server sent message format
 {
 	who: "ggyy",
 	body: "hello",
-	date: Date.now()
+	date: Date.now(),
+	event: SocketEvent.JOIN
 }
-*/
-
-/* server sent system message format
-	plain string, no json.
 */
 
 io.on("connection", function(socket){
@@ -35,39 +32,41 @@ function handleConnect(socket){
 }
 
 function registerJoinEvent(socket){
-	socket.on(socketEvent.JOIN, function(data){
-		data = JSON.parse(data);
-		if(!isValidData(data)){ return; }
-		var message = data.who + " has joined the room.";
-		console.log(message);
-		io.emit(socketEvent.JOIN, message);
+	socket.on(SocketEvent.JOIN, function(data){
+		if(!isValidData(data, socket.id)){ return; }
+		var message = new ServerMessage(data, SocketEvent.JOIN);
+		message.body = "has joined the room.";
+		console.log([message.who, message.body].join(" "));
+		io.emit(SocketEvent.JOIN, message);
 	});
 }
 
 function registerLeaveEvent(socket){
-	socket.on(socketEvent.LEAVE, function(data){
-		data = JSON.parse(data);
-		isValidData(data);
-		var message = data.who + " has left the room.";
-		console.log(message);
-		io.emit(socketEvent.LEAVE, message);
+	socket.on(SocketEvent.LEAVE, function(data){
+		isValidData(data, socket.id);
+		var message = new ServerMessage(data, SocketEvent.LEAVE);
+		message.body = "has left the room.";
+		console.log([message.who, message.body].join(" "));
+		io.emit(SocketEvent.LEAVE, message);
 	});
 }
 
 function registerChatEvent(socket){
-	socket.on(socketEvent.CHAT, function(data){
-		data = JSON.parse(data);
-		if(!isValidData(data)){ return; }
-		console.log(data.who + " : " + data.body);
-		data.date = new Date(Date.now());
-		db.createMessage(data.who, data.body, data.date);
-		io.emit(socketEvent.CHAT, data);
+	socket.on(SocketEvent.CHAT, function(data){
+		if(!isValidData(data, socket.id)){ return; }
+		var message = new ServerMessage(data, SocketEvent.CHAT);
+		console.log([message.who, message.body].join(" : "));
+		db.createMessage(message.who, message.body, message.date);
+		io.emit(SocketEvent.CHAT, message);
 	});
 }
 
-function isValidData(data){
-	if(!clientMessage.isValid(data)){
-		io.to(data.id).emit(socketEvent.ERROR, "'who', 'body' and 'id' fields can't be empty.");
+function isValidData(data, id){
+	if(!ClientMessage.isValid(data)){
+		var message = new ServerMessage();
+		message.body = "'who' and 'body' fields can't be empty.";
+		message.event = SocketEvent.ERROR;
+		io.to(id).emit(SocketEvent.ERROR, message);
 		return false;
 	}
 	return true;
