@@ -8,7 +8,7 @@ import ChatBox from "./ChatBox";
 import MessageBox from "./MessageBox";
 import Login from "./Login";
 
-import Store from "../reducers/MainReducer";
+import Store from "../store/Store";
 import * as Actions from "../actions/Actions";
 
 class MainView extends React.Component{

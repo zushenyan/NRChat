@@ -1,5 +1,6 @@
 module.exports = {
 	API_MESSAGES: "/api/messages",
+	API_SESSION: "/api/session",
 
 	// pages
 	INDEX: "/",

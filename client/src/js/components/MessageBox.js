@@ -1,6 +1,6 @@
 import React from "react";
 
-import Store from "../reducers/MainReducer";
+import Store from "../store/Store";
 import * as Actions from "../actions/Actions";
 
 class ServerMessage extends React.Component{

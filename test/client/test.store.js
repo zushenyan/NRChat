@@ -3,6 +3,7 @@ import resetDB from "../resetDB";
 import {createAnotherStore, createSingletonStore} from "../../client/src/js/store/Store";
 import * as Actions from "../../client/src/js/actions/Actions";
 import server from 	"../../server/server";
+import url from "../../server/url";
 import SocketEvent from "../../server/socket/socketEvent";
 
 describe("test client reducer", function(){
@@ -44,6 +45,16 @@ describe("test client reducer", function(){
 
 		after("clear stores", function(){
 			store3.getState().NRChatReducer.socket.disconnect();
+		});
+	});
+
+	describe("check login state", function(){
+		it("should work", function(done){
+			setTimeout(() => {
+				let username = store1.getState().NRChatReducer.username;
+				expect(username).to.match(/Guest#\S{5}$/);
+				done();
+			}, 1500);
 		});
 	});
 
@@ -113,14 +124,26 @@ describe("test client reducer", function(){
 	describe("login", function(){
 		it("login failed", function(done){
 			store1.subscribe(() => {
-				console.log("wqeeq");
+				let res = store1.getState().NRChatReducer.response;
+				expect(res).to.eql({status: 400, message: "invalid username or password!"});
 				done();
 			});
-			store1.dispatch(Actions.requestLogin("ggyy", "123123", null));
+			store1.dispatch(Actions.requestLogin("ggyy", "123123"));
 		});
 
-		// it("login failed", function(){
-		//
-		// });
+		it("login successfully", function(){
+			store1.subscribe(() => {
+				let res = store1.getState().NRChatReducer.response;
+				expect(res).to.eql({status: 307, location: url.INDEX});
+				done();
+			});
+			store1.dispatch(Actions.requestLogin("ggyy", "1234"));
+		});
+	});
+
+	describe("logout", function(){
+		it("shuold work", function(done){
+
+		});
 	});
 });

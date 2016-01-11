@@ -8,6 +8,7 @@ export const SEND_LEAVE_INFO = "send leave";
 export const SEND_MESSAGE = "send message";
 export const RECEIVE_MESSAGE_HISTORY = "receive message history";
 export const RECEIVE_MESSAGE = "receive message";
+export const RECEIVE_LOGIN_STATE = "receive login state";
 export const SET_USERNAME = "set username";
 export const SIGN_UP = "sign up";
 export const LOGIN = "login";
@@ -65,23 +66,36 @@ export function receiveMessage(message){
 	};
 }
 
+function receiveLoginState(session){
+	return {
+		type: RECEIVE_LOGIN_STATE,
+		session
+	};
+}
+
+export function checkLoginState(){
+	return dispatch => {
+		fetch(env.SERVER_FETCH_SESSION)
+			.then( res => res.json() )
+			.then( json => dispatch(receiveLoginState(json)) );
+	};
+};
+
 export function setUsername(username){
 	return {
 		type: SET_USERNAME,
 		username
-	}
-}
-
-function login(response, username, router){
-	return {
-		type: LOGIN,
-		response,
-		username,
-		router
 	};
 }
 
-export function requestLogin(username, password, router){
+function login(response){
+	return {
+		type: LOGIN,
+		response
+	};
+}
+
+export function requestLogin(username, password){
 	return dispatch => {
 		let options = {
 			method: "POST",
@@ -91,8 +105,8 @@ export function requestLogin(username, password, router){
 			},
 			body: JSON.stringify({ username, password })
 		};
-		fetch(env.SERVER_URL + "/login", options)
+		fetch(env.SERVER_LOGIN, options)
 			.then( res => res.json() )
-			.then( json => dispatch(login(json, username, router)) );
+			.then( json => dispatch(login(json)) );
 	};
 }

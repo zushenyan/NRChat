@@ -7,7 +7,7 @@ import * as env from "../env/Environment";
 
 const INITIAL_STATE = {
 	username: "",
-	authorized: false,
+	response: {},
 	messageHistory: [],
 	socket: null
 };
@@ -34,6 +34,8 @@ export function reducer(state = createState(), action){
 			return _setUsername(state, action);
 		case Actions.LOGIN:
 			return _login(state, action);
+		case Actions.RECEIVE_LOGIN_STATE:
+			return _receiveLoginState(state, action);
 		default:
 			return state;
 	}
@@ -83,6 +85,12 @@ function _sendLeaveInfo(state, action){
 	return state;
 }
 
+function _receiveLoginState(state, action){
+	return _.assign({}, state, {
+		username: action.session.username
+	});
+}
+
 function _setUsername(state, action){
 	return _.assign({}, state, {
 		username: action.username
@@ -91,6 +99,6 @@ function _setUsername(state, action){
 
 function _login(state, action){
 	return _.assign({}, state, {
-		username: action.username
+		response: action.response
 	});
 }

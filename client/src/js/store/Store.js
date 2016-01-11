@@ -34,6 +34,7 @@ function setup(store){
 		onJoin: getMessage,
 		onLeave: getMessage
 	}));
+	store.dispatch(Actions.checkLoginState());
 	function getMessage(data){
 		store.dispatch(Actions.receiveMessage(data));
 	}

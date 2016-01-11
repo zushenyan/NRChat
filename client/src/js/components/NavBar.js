@@ -1,7 +1,7 @@
 import React from "react";
 import {Link, IndexLink} from "react-router";
 
-import Store from "../reducers/MainReducer";
+import Store from "../store/Store";
 import * as Actions from "../actions/Actions";
 
 class Button extends React.Component {

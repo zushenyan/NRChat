@@ -13,4 +13,12 @@ router.get(url.API_MESSAGES, function(req, res, next){
 	});
 });
 
+router.get(url.API_SESSION, function(req, res, next){
+	var username = req.user ? req.user.username : "Guest#" + req.session.id.substr(0,5);
+	res.json({
+		username: username,
+		id: req.session.id
+	});
+});
+
 module.exports = router;
