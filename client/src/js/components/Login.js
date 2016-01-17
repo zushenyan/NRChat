@@ -1,5 +1,9 @@
 import React from "react";
-import ReactDOM from "react-dom";
+
+import * as store from "../store/Store";
+import * as Actions from "../actions/Actions";
+
+let Store = store.createSingletonStore();
 
 export default class Login extends React.Component {
 	constructor(props){

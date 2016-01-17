@@ -8,11 +8,9 @@ export const SEND_LEAVE_INFO = "send leave";
 export const SEND_MESSAGE = "send message";
 export const RECEIVE_MESSAGE_HISTORY = "receive message history";
 export const RECEIVE_MESSAGE = "receive message";
-export const RECEIVE_LOGIN_STATE = "receive login state";
-export const SET_USERNAME = "set username";
-export const SIGN_UP = "sign up";
-export const LOGIN = "login";
+export const RECEIVE_AUTH = "receive auth";
 export const LOGOUT = "logout";
+export const SET_USERNAME = "set username";
 
 // actions
 export function setup({onJoin, onError, onChat, onLeave}){
@@ -66,21 +64,6 @@ export function receiveMessage(message){
 	};
 }
 
-function receiveLoginState(session){
-	return {
-		type: RECEIVE_LOGIN_STATE,
-		session
-	};
-}
-
-export function checkLoginState(){
-	return dispatch => {
-		fetch(env.SERVER_FETCH_SESSION)
-			.then( res => res.json() )
-			.then( json => dispatch(receiveLoginState(json)) );
-	};
-};
-
 export function setUsername(username){
 	return {
 		type: SET_USERNAME,
@@ -88,14 +71,14 @@ export function setUsername(username){
 	};
 }
 
-function login(response){
+function receiveAuth(payload){
 	return {
-		type: LOGIN,
-		response
+		type: RECEIVE_AUTH,
+		payload
 	};
 }
 
-export function requestLogin(username, password){
+export function requestAuth(username, password){
 	return dispatch => {
 		let options = {
 			method: "POST",
@@ -105,8 +88,59 @@ export function requestLogin(username, password){
 			},
 			body: JSON.stringify({ username, password })
 		};
-		fetch(env.SERVER_LOGIN, options)
+		fetch(env.SERVER_AUTH, options)
 			.then( res => res.json() )
-			.then( json => dispatch(login(json)) );
+			.then( json => dispatch(receiveAuth(json)) );
+	};
+}
+
+export function checkAuth(token){
+	return dispatch => {
+		let options = {
+			method: "POST",
+			headers: {
+				"Accept" : "application/json",
+				"Content-Type" : "application/json"
+			},
+			body: JSON.stringify({token})
+		};
+		fetch(env.SERVER_AUTH, options)
+			.then( res => res.json() )
+			.then( json => dispatch(receiveAuth(json)) );
+	};
+}
+
+export function fetchGuestName(){
+	return dispatch => {
+		let options = {
+			headers: {
+				"Accept" : "application/json"
+			}
+		};
+		fetch(env.SERVER_FETCH_GUESTNAME, options)
+			.then( res => res.json() )
+			.then( json => dispatch(setUsername(json.username)) );
+	};
+}
+
+export function requestSignup(username, password){
+	return dispatch => {
+		let options = {
+			method: "POST",
+			headers: {
+				"Accept" : "application/json",
+				"Content-Type" : "application/json"
+			},
+			body: JSON.stringify({username, password})
+		};
+		fetch(env.SERVER_SIGNUP, options)
+			.then( res => res.json() )
+			.then( json => dispatch(receiveAuth(json)) );
+	};
+}
+
+export function logout(){
+	return {
+		type: LOGOUT
 	};
 }

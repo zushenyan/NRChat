@@ -21,7 +21,7 @@ function createClient(){
 	return socket;
 }
 
-describe("test socket", function(){
+describe("Test Socket", function(){
 	var client1, client2;
 
 	before("setup server", function(done){

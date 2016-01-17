@@ -46,6 +46,7 @@
     "express-session": "^1.12.1",
     "history": "^1.17.0",
     "isomorphic-fetch": "^2.2.0",
+    "jsonwebtoken": "^5.5.4",
     "kerberos": "0.0.17",
     "lodash": "^3.10.1",
     "mongodb": "^2.0.52",

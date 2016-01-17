@@ -8,8 +8,10 @@ import ChatBox from "./ChatBox";
 import MessageBox from "./MessageBox";
 import Login from "./Login";
 
-import Store from "../store/Store";
+import * as store from "../store/Store";
 import * as Actions from "../actions/Actions";
+
+let Store = store.createSingletonStore();
 
 class MainView extends React.Component{
 	constructor(props){
@@ -31,12 +33,8 @@ class App extends React.Component{
 		super(props);
 	}
 
-	componentDidMount(){
-		// $("#nameDialog").modal("show");
-	}
-
 	componentWillUnmount(){
-		// Store.dispatch(ChatAction.disconnect());
+		Store.dispatch(Actions.sendLeaveInfo());
 	}
 
 	render(){

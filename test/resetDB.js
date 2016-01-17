@@ -1,7 +1,8 @@
+var mongoose = require("mongoose");
 var db = require("../server/db/db");
 var User = require("../server/db/user");
 var Message = require("../server/db/message");
-var mongoose = require("mongoose");
+var SocketEvent = require("../server/socket/socketEvent");
 
 var users = [
 	{
@@ -17,15 +18,23 @@ var users = [
 var messages = [
 	{
 		who: "ggyy",
-		body: "hello there"
+		body: "hello there",
+		event: SocketEvent.CHAT
 	},
 	{
 		who: "qwerty",
-		body: "meow"
+		body: "meow",
+		event: SocketEvent.JOIN
 	},
 	{
 		who: "guest#1234",
-		body: "woooooooooo"
+		body: "woooooooooo",
+		event: SocketEvent.LEAVE
+	},
+	{
+		who: "anotherGuest",
+		body: "i am an error",
+		event: SocketEvent.ERROR
 	}
 ];
 

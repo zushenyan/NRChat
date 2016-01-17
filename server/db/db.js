@@ -23,10 +23,11 @@ db.getMessages = function(callback){
 		.exec(callback);
 };
 
-db.createMessage = function(who, body, date, callback){
+db.createMessage = function(who, body, event, date, callback){
 	var newMessage = new Message({
 		who: who,
 		body: body,
+		event: event,
 		date: date
 	});
 	newMessage.save(callback);

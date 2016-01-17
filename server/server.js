@@ -5,12 +5,11 @@ var session = require("express-session");
 var path = require("path");
 var mongoose = require("mongoose");
 
-var flash = require("connect-flash");
 var io = require("./socket/socket");
 
-var passport = require("./mypassport");
-var api = require("./api");
-var routes = require("./routes");
+var authRoutes = require("./routes/auth");
+var apiRoutes = require("./routes/api");
+var indexRoutes = require("./routes/index");
 
 var PORT = process.env.PORT || 8080;
 
@@ -24,11 +23,9 @@ var app = express()
 		resave: false,
 		saveUninitialized: true
 	}))
-	.use(flash())
-	.use(passport.initialize())
-	.use(passport.session())
-	.use(api)
-	.use(routes);
+	.use("/auth", authRoutes)
+	.use("/api", apiRoutes)
+	.use("/", indexRoutes);
 
 var server;
 var expose = {
@@ -47,8 +44,8 @@ function open(callback){
 	server = app.listen(PORT, function(){
 		io.listen(server);
 		mongoose.connect("mongodb://localhost:27017");
-		if(callback){ callback(); }
 		expose.server = server;
+		if(callback){ callback(); }
 		console.log("server is running...");
 	});
 }

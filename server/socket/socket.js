@@ -56,7 +56,7 @@ function registerChatEvent(socket){
 		if(!isValidData(data, socket.id)){ return; }
 		var message = new ServerMessage(data, SocketEvent.CHAT);
 		console.log([message.who, message.body].join(" : "));
-		db.createMessage(message.who, message.body, message.date);
+		db.createMessage(message.who, message.body, SocketEvent.CHAT, message.date);
 		io.emit(SocketEvent.CHAT, message);
 	});
 }

@@ -1,13 +1,14 @@
 import io from "socket.io-client";
 import _ from "lodash";
-import SocketEvent from "../../../../server/socket/socketEvent";
-import ClientMessage from "../../../../server/socket/clientMessage";
+import SocketEvent from "../env/SocketEvent";
+import ClientMessage from "../env/ClientMessage";
 import * as Actions from "../actions/Actions";
 import * as env from "../env/Environment";
 
 const INITIAL_STATE = {
 	username: "",
-	response: {},
+	token: "",
+	lastResponse: {},
 	messageHistory: [],
 	socket: null
 };
@@ -32,10 +33,10 @@ export function reducer(state = createState(), action){
 			return _sendLeaveInfo(state, action);
 		case Actions.SET_USERNAME:
 			return _setUsername(state, action);
-		case Actions.LOGIN:
-			return _login(state, action);
-		case Actions.RECEIVE_LOGIN_STATE:
-			return _receiveLoginState(state, action);
+		case Actions.LOGOUT:
+			return _logout(state, action);
+		case Actions.RECEIVE_AUTH:
+			return _receiveAuth(state, action);
 		default:
 			return state;
 	}
@@ -85,9 +86,11 @@ function _sendLeaveInfo(state, action){
 	return state;
 }
 
-function _receiveLoginState(state, action){
+function _receiveAuth(state, action){
 	return _.assign({}, state, {
-		username: action.session.username
+		username: action.payload.username || "",
+		token: action.payload.token || "",
+		lastResponse: action.payload
 	});
 }
 
@@ -97,8 +100,8 @@ function _setUsername(state, action){
 	});
 }
 
-function _login(state, action){
+function _logout(state, action){
 	return _.assign({}, state, {
-		response: action.response
+		token: ""
 	});
 }

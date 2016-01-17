@@ -80,7 +80,7 @@
 	
 	var _Store = __webpack_require__(208);
 	
-	var _Store2 = _interopRequireDefault(_Store);
+	var store = _interopRequireWildcard(_Store);
 	
 	var _Actions = __webpack_require__(274);
 	
@@ -95,6 +95,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Store = store.createSingletonStore();
 	
 	var MainView = (function (_React$Component) {
 		_inherits(MainView, _React$Component);
@@ -130,14 +132,9 @@
 		}
 	
 		_createClass(App, [{
-			key: "componentDidMount",
-			value: function componentDidMount() {
-				// $("#nameDialog").modal("show");
-			}
-		}, {
 			key: "componentWillUnmount",
 			value: function componentWillUnmount() {
-				// Store.dispatch(ChatAction.disconnect());
+				Store.dispatch(Actions.sendLeaveInfo());
 			}
 		}, {
 			key: "render",
@@ -24293,7 +24290,7 @@
 	
 	var _Store = __webpack_require__(208);
 	
-	var _Store2 = _interopRequireDefault(_Store);
+	var store = _interopRequireWildcard(_Store);
 	
 	var _Actions = __webpack_require__(274);
 	
@@ -24308,6 +24305,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Store = store.createSingletonStore();
 	
 	var Button = (function (_React$Component) {
 		_inherits(Button, _React$Component);
@@ -24371,18 +24370,17 @@
 			_this2.state = {
 				username: ""
 			};
-			// Store.subscribe(() => {
-			// 	this.setState({
-			// 		username: Store.getState().NRChatReducer.username
-			// 	});
-			// });
+			Store.subscribe(function () {
+				_this2.setState({
+					username: Store.getState().NRChatReducer.username
+				});
+			});
 			return _this2;
 		}
 	
 		_createClass(NavBar, [{
 			key: "render",
 			value: function render() {
-				var username = this.state.username ? this.state.username : "Guest";
 				return _react2.default.createElement(
 					"nav",
 					{ className: "navbar navbar-default navbar-fixed-top" },
@@ -24408,7 +24406,7 @@
 									"li",
 									{ className: "navbar-text pull-left" },
 									"Hello ",
-									username
+									this.state.username
 								),
 								_react2.default.createElement(
 									"li",
@@ -24477,7 +24475,7 @@
 		var newStore = createStoreWithMiddleware(_RootReducer2.default, initState);
 		setup(newStore);
 		return newStore;
-	};
+	}
 	
 	function createSingletonStore() {
 		if (_store) {
@@ -24486,7 +24484,7 @@
 		_store = createStoreWithMiddleware(_RootReducer2.default, createState());
 		setup(_store);
 		return _store;
-	};
+	}
 	
 	function setup(store) {
 		store.dispatch(Actions.setup({
@@ -24495,7 +24493,7 @@
 			onJoin: getMessage,
 			onLeave: getMessage
 		}));
-		store.dispatch(Actions.checkLoginState());
+		store.dispatch(Actions.fetchGuestName());
 		function getMessage(data) {
 			store.dispatch(Actions.receiveMessage(data));
 		}
@@ -25148,13 +25146,13 @@
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _socketEvent = __webpack_require__(272);
+	var _SocketEvent = __webpack_require__(272);
 	
-	var _socketEvent2 = _interopRequireDefault(_socketEvent);
+	var _SocketEvent2 = _interopRequireDefault(_SocketEvent);
 	
-	var _clientMessage = __webpack_require__(273);
+	var _ClientMessage = __webpack_require__(273);
 	
-	var _clientMessage2 = _interopRequireDefault(_clientMessage);
+	var _ClientMessage2 = _interopRequireDefault(_ClientMessage);
 	
 	var _Actions = __webpack_require__(274);
 	
@@ -25170,7 +25168,8 @@
 	
 	var INITIAL_STATE = {
 		username: "",
-		response: {},
+		token: "",
+		lastResponse: {},
 		messageHistory: [],
 		socket: null
 	};
@@ -25198,10 +25197,10 @@
 				return _sendLeaveInfo(state, action);
 			case Actions.SET_USERNAME:
 				return _setUsername(state, action);
-			case Actions.LOGIN:
-				return _login(state, action);
-			case Actions.RECEIVE_LOGIN_STATE:
-				return _receiveLoginState(state, action);
+			case Actions.LOGOUT:
+				return _logout(state, action);
+			case Actions.RECEIVE_AUTH:
+				return _receiveAuth(state, action);
 			default:
 				return state;
 		}
@@ -25209,10 +25208,10 @@
 	
 	function _setup(state, action) {
 		var socket = _socket2.default.connect(env.SERVER_URL, { "force new connection": true });
-		socket.on(_socketEvent2.default.JOIN, action.onJoin);
-		socket.on(_socketEvent2.default.CHAT, action.onChat);
-		socket.on(_socketEvent2.default.LEAVE, action.onLeave);
-		socket.on(_socketEvent2.default.ERROR, action.onError);
+		socket.on(_SocketEvent2.default.JOIN, action.onJoin);
+		socket.on(_SocketEvent2.default.CHAT, action.onChat);
+		socket.on(_SocketEvent2.default.LEAVE, action.onLeave);
+		socket.on(_SocketEvent2.default.ERROR, action.onError);
 		return _lodash2.default.assign({}, state, {
 			onJoin: action.onJoin,
 			onChat: action.onChat,
@@ -25237,23 +25236,25 @@
 	}
 	
 	function _sendJoinInfo(state, action) {
-		state.socket.emit(_socketEvent2.default.JOIN, new _clientMessage2.default(state.username, "hi"));
+		state.socket.emit(_SocketEvent2.default.JOIN, new _ClientMessage2.default(state.username, "hi"));
 		return state;
 	}
 	
 	function _sendMessage(state, action) {
-		state.socket.emit(_socketEvent2.default.CHAT, new _clientMessage2.default(state.username, action.message));
+		state.socket.emit(_SocketEvent2.default.CHAT, new _ClientMessage2.default(state.username, action.message));
 		return state;
 	}
 	
 	function _sendLeaveInfo(state, action) {
-		state.socket.emit(_socketEvent2.default.LEAVE, new _clientMessage2.default(state.username, "bye"));
+		state.socket.emit(_SocketEvent2.default.LEAVE, new _ClientMessage2.default(state.username, "bye"));
 		return state;
 	}
 	
-	function _receiveLoginState(state, action) {
+	function _receiveAuth(state, action) {
 		return _lodash2.default.assign({}, state, {
-			username: action.session.username
+			username: action.payload.username || "",
+			token: action.payload.token || "",
+			lastResponse: action.payload
 		});
 	}
 	
@@ -25263,9 +25264,9 @@
 		});
 	}
 	
-	function _login(state, action) {
+	function _logout(state, action) {
 		return _lodash2.default.assign({}, state, {
-			response: action.response
+			token: ""
 		});
 	}
 
@@ -44957,12 +44958,17 @@
 
 	"use strict";
 	
-	module.exports = {
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var SocketEvent = {
 		JOIN: "join",
 		LEAVE: "leave",
 		CHAT: "chat",
 		ERROR: "error"
 	};
+	
+	exports.default = SocketEvent;
 
 /***/ },
 /* 273 */
@@ -44970,16 +44976,20 @@
 
 	"use strict";
 	
-	function ClientMessage(who, body) {
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var ClientMessage = function ClientMessage(who, body) {
+		_classCallCheck(this, ClientMessage);
+	
 		this.who = who;
 		this.body = body;
-	}
-	
-	ClientMessage.isValid = function (data) {
-		return data.who && data.body;
 	};
 	
-	module.exports = ClientMessage;
+	exports.default = ClientMessage;
 
 /***/ },
 /* 274 */
@@ -44990,16 +45000,19 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.LOGOUT = exports.LOGIN = exports.SIGN_UP = exports.SET_USERNAME = exports.RECEIVE_LOGIN_STATE = exports.RECEIVE_MESSAGE = exports.RECEIVE_MESSAGE_HISTORY = exports.SEND_MESSAGE = exports.SEND_LEAVE_INFO = exports.SEND_JOIN_INFO = exports.SETUP = undefined;
+	exports.SET_USERNAME = exports.LOGOUT = exports.RECEIVE_AUTH = exports.RECEIVE_MESSAGE = exports.RECEIVE_MESSAGE_HISTORY = exports.SEND_MESSAGE = exports.SEND_LEAVE_INFO = exports.SEND_JOIN_INFO = exports.SETUP = undefined;
 	exports.setup = setup;
 	exports.sendJoinInfo = sendJoinInfo;
 	exports.sendLeaveInfo = sendLeaveInfo;
 	exports.sendMessage = sendMessage;
 	exports.fetchMessageHistory = fetchMessageHistory;
 	exports.receiveMessage = receiveMessage;
-	exports.checkLoginState = checkLoginState;
 	exports.setUsername = setUsername;
-	exports.requestLogin = requestLogin;
+	exports.requestAuth = requestAuth;
+	exports.checkAuth = checkAuth;
+	exports.fetchGuestName = fetchGuestName;
+	exports.requestSignup = requestSignup;
+	exports.logout = logout;
 	
 	var _isomorphicFetch = __webpack_require__(275);
 	
@@ -45020,11 +45033,9 @@
 	var SEND_MESSAGE = exports.SEND_MESSAGE = "send message";
 	var RECEIVE_MESSAGE_HISTORY = exports.RECEIVE_MESSAGE_HISTORY = "receive message history";
 	var RECEIVE_MESSAGE = exports.RECEIVE_MESSAGE = "receive message";
-	var RECEIVE_LOGIN_STATE = exports.RECEIVE_LOGIN_STATE = "receive login state";
-	var SET_USERNAME = exports.SET_USERNAME = "set username";
-	var SIGN_UP = exports.SIGN_UP = "sign up";
-	var LOGIN = exports.LOGIN = "login";
+	var RECEIVE_AUTH = exports.RECEIVE_AUTH = "receive auth";
 	var LOGOUT = exports.LOGOUT = "logout";
+	var SET_USERNAME = exports.SET_USERNAME = "set username";
 	
 	// actions
 	function setup(_ref) {
@@ -45085,23 +45096,6 @@
 		};
 	}
 	
-	function receiveLoginState(session) {
-		return {
-			type: RECEIVE_LOGIN_STATE,
-			session: session
-		};
-	}
-	
-	function checkLoginState() {
-		return function (dispatch) {
-			(0, _isomorphicFetch2.default)(env.SERVER_FETCH_SESSION).then(function (res) {
-				return res.json();
-			}).then(function (json) {
-				return dispatch(receiveLoginState(json));
-			});
-		};
-	};
-	
 	function setUsername(username) {
 		return {
 			type: SET_USERNAME,
@@ -45109,14 +45103,14 @@
 		};
 	}
 	
-	function login(response) {
+	function receiveAuth(payload) {
 		return {
-			type: LOGIN,
-			response: response
+			type: RECEIVE_AUTH,
+			payload: payload
 		};
 	}
 	
-	function requestLogin(username, password) {
+	function requestAuth(username, password) {
 		return function (dispatch) {
 			var options = {
 				method: "POST",
@@ -45126,11 +45120,68 @@
 				},
 				body: JSON.stringify({ username: username, password: password })
 			};
-			(0, _isomorphicFetch2.default)(env.SERVER_LOGIN, options).then(function (res) {
+			(0, _isomorphicFetch2.default)(env.SERVER_AUTH, options).then(function (res) {
 				return res.json();
 			}).then(function (json) {
-				return dispatch(login(json));
+				return dispatch(receiveAuth(json));
 			});
+		};
+	}
+	
+	function checkAuth(token) {
+		return function (dispatch) {
+			var options = {
+				method: "POST",
+				headers: {
+					"Accept": "application/json",
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ token: token })
+			};
+			(0, _isomorphicFetch2.default)(env.SERVER_AUTH, options).then(function (res) {
+				return res.json();
+			}).then(function (json) {
+				return dispatch(receiveAuth(json));
+			});
+		};
+	}
+	
+	function fetchGuestName() {
+		return function (dispatch) {
+			var options = {
+				headers: {
+					"Accept": "application/json"
+				}
+			};
+			(0, _isomorphicFetch2.default)(env.SERVER_FETCH_GUESTNAME, options).then(function (res) {
+				return res.json();
+			}).then(function (json) {
+				return dispatch(setUsername(json.username));
+			});
+		};
+	}
+	
+	function requestSignup(username, password) {
+		return function (dispatch) {
+			var options = {
+				method: "POST",
+				headers: {
+					"Accept": "application/json",
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ username: username, password: password })
+			};
+			(0, _isomorphicFetch2.default)(env.SERVER_SIGNUP, options).then(function (res) {
+				return res.json();
+			}).then(function (json) {
+				return dispatch(receiveAuth(json));
+			});
+		};
+	}
+	
+	function logout() {
+		return {
+			type: LOGOUT
 		};
 	}
 
@@ -45546,10 +45597,9 @@
 	
 	var SERVER_URL = exports.SERVER_URL = dev ? "http://localhost:8080" : location.origin;
 	var SERVER_FETCH_MESSAGE = exports.SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
-	var SERVER_FETCH_SESSION = exports.SERVER_FETCH_SESSION = SERVER_URL + "/api/session";
-	var SERVER_LOGIN = exports.SERVER_LOGIN = SERVER_URL + "/login";
-	var SERVER_LOGOUT = exports.SERVER_LOGOUT = SERVER_URL + "/logout";
-	var SERVER_REGISTER = exports.SERVER_REGISTER = SERVER_URL + "/register";
+	var SERVER_FETCH_GUESTNAME = exports.SERVER_FETCH_GUESTNAME = SERVER_URL + "/api/id";
+	var SERVER_AUTH = exports.SERVER_AUTH = SERVER_URL + "/auth/authenticate";
+	var SERVER_SIGNUP = exports.SERVER_SIGNUP = SERVER_URL + "/auth/signup";
 
 /***/ },
 /* 278 */
@@ -45569,7 +45619,7 @@
 	
 	var _Store = __webpack_require__(208);
 	
-	var _Store2 = _interopRequireDefault(_Store);
+	var store = _interopRequireWildcard(_Store);
 	
 	var _Actions = __webpack_require__(274);
 	
@@ -45584,6 +45634,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Store = store.createSingletonStore();
 	
 	var ChatBox = (function (_React$Component) {
 		_inherits(ChatBox, _React$Component);
@@ -45608,7 +45660,7 @@
 				var messageInput = document.getElementById("messageInput");
 				var message = messageInput.value;
 				if (message && message !== "") {
-					// Store.dispatch(ChatAction.sendMessage(message));
+					Store.dispatch(Actions.sendMessage(message));
 					messageInput.value = "";
 				}
 			}
@@ -45676,11 +45728,15 @@
 	
 	var _Store = __webpack_require__(208);
 	
-	var _Store2 = _interopRequireDefault(_Store);
+	var store = _interopRequireWildcard(_Store);
 	
 	var _Actions = __webpack_require__(274);
 	
 	var Actions = _interopRequireWildcard(_Actions);
+	
+	var _SocketEvent = __webpack_require__(272);
+	
+	var _SocketEvent2 = _interopRequireDefault(_SocketEvent);
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
@@ -45691,6 +45747,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Store = store.createSingletonStore();
 	
 	var ServerMessage = (function (_React$Component) {
 		_inherits(ServerMessage, _React$Component);
@@ -45709,8 +45767,13 @@
 					{ className: "row" },
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-12 text-left", style: { color: "red" } },
+						{ className: "col-xs-10 text-left", style: { color: this.props.color } },
 						this.props.message
+					),
+					_react2.default.createElement(
+						"span",
+						{ className: "col-xs-2 text-right" },
+						this.props.date
 					)
 				);
 			}
@@ -45718,6 +45781,8 @@
 	
 		return ServerMessage;
 	})(_react2.default.Component);
+	
+	ServerMessage.defaultProps = { color: "red" };
 	
 	var ChatMessage = (function (_React$Component2) {
 		_inherits(ChatMessage, _React$Component2);
@@ -45743,6 +45808,11 @@
 						"span",
 						{ className: "col-xs-8 text-left" },
 						this.props.message
+					),
+					_react2.default.createElement(
+						"span",
+						{ className: "col-xs-2 text-right" },
+						this.props.date
 					)
 				);
 			}
@@ -45760,19 +45830,32 @@
 			var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(MessageBox).call(this, props));
 	
 			_this3.state = {
-				messages: []
+				messages: [],
+				unsubscribe: null
 			};
-			// Store.subscribe(this.fetchMessages.bind(this));
-			// Store.dispatch(ChatAction.fetchMessages());
 			return _this3;
 		}
 	
 		_createClass(MessageBox, [{
+			key: "componentDidMount",
+			value: function componentDidMount() {
+				var unsub = Store.subscribe(this.fetchMessages.bind(this));
+				this.setState({
+					unsubscribe: unsub
+				});
+				Store.dispatch(Actions.fetchMessageHistory());
+			}
+		}, {
+			key: "componentWillUnmount",
+			value: function componentWillUnmount() {
+				this.state.unsubscribe();
+			}
+		}, {
 			key: "fetchMessages",
 			value: function fetchMessages() {
-				// this.setState({
-				// 	messages: Store.getState().NRChatReducer.messages
-				// });
+				this.setState({
+					messages: Store.getState().NRChatReducer.messageHistory
+				});
 			}
 		}, {
 			key: "render",
@@ -45781,19 +45864,22 @@
 				var messageNodes = [];
 				this.state.messages.forEach(function (ele, index) {
 					var messageNode = null;
+					var tempDate = ele.date.split("T")[0];
+					var tempTime = ele.date.split("T")[1].split(".")[0];
+					var date = [tempDate, tempTime].join("  ");
 					switch (ele.event) {
-						case ChatAction.EVENT_HELLO:
-							messageNode = _react2.default.createElement(ServerMessage, { message: ele.user + " has joined the room.", key: index });
+						case _SocketEvent2.default.JOIN:
+							messageNode = _react2.default.createElement(ServerMessage, { message: ele.who + " has joined the room.", color: "blue", date: date, key: index });
 							break;
-						case ChatAction.EVENT_BEFORE_DISCONNECT:
-							messageNode = _react2.default.createElement(ServerMessage, { message: ele.user + " has left the room.", key: index });
+						case _SocketEvent2.default.LEAVE:
+							messageNode = _react2.default.createElement(ServerMessage, { message: ele.who + " has left the room.", color: "blue", date: date, key: index });
 							break;
-						case ChatAction.EVENT_ERROR:
-							messageNode = _react2.default.createElement(ServerMessage, { message: ele.message, key: index });
+						case _SocketEvent2.default.ERROR:
+							messageNode = _react2.default.createElement(ServerMessage, { message: ele.body, key: index });
 							break;
-						case ChatAction.EVENT_CHAT:
+						case _SocketEvent2.default.CHAT:
 						default:
-							messageNode = _react2.default.createElement(ChatMessage, { user: ele.user, message: ele.message, key: index });
+							messageNode = _react2.default.createElement(ChatMessage, { user: ele.who, message: ele.body, date: date, key: index });
 					}
 					messageNodes.push(messageNode);
 				});
@@ -45826,9 +45912,15 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _reactDom = __webpack_require__(158);
+	var _Store = __webpack_require__(208);
 	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
+	var store = _interopRequireWildcard(_Store);
+	
+	var _Actions = __webpack_require__(274);
+	
+	var Actions = _interopRequireWildcard(_Actions);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -45837,6 +45929,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Store = store.createSingletonStore();
 	
 	var Login = (function (_React$Component) {
 		_inherits(Login, _React$Component);

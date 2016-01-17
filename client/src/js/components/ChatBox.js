@@ -1,7 +1,9 @@
 import React from "react";
 
-import Store from "../store/Store";
+import * as store from "../store/Store";
 import * as Actions from "../actions/Actions";
+
+let Store = store.createSingletonStore();
 
 export default class ChatBox extends React.Component{
 	constructor(props){
@@ -19,7 +21,7 @@ export default class ChatBox extends React.Component{
 		let messageInput = document.getElementById("messageInput");
 		let message = messageInput.value;
 		if(message && message !== ""){
-			// Store.dispatch(ChatAction.sendMessage(message));
+			Store.dispatch(Actions.sendMessage(message));
 			messageInput.value = "";
 		}
 	}

@@ -3,6 +3,7 @@ var mongoose = require("mongoose");
 var db = require("../../server/db/db");
 var User = require("../../server/db/user");
 var Message = require("../../server/db/message");
+var SocketEvent = require("../../server/socket/socketEvent");
 
 var user1 = {
 	username: "aaaa",
@@ -42,18 +43,14 @@ describe("Test db functionalities", function(){
 		mongoose.disconnect(done);
 	});
 
-	beforeEach("resetUsers", function(done){
+	beforeEach("reset Users and Messages", function(done){
 		User.find({}).remove().exec(function(){
 			User.create(users, function(){
-				done();
-			});
-		});
-	});
-
-	beforeEach("resetMessage", function(done){
-		Message.find({}).remove().exec(function(){
-			Message.create(messages, function(){
-				done();
+				Message.find({}).remove().exec(function(){
+					Message.create(messages, function(){
+						done();
+					});
+				});
 			});
 		});
 	});
@@ -131,16 +128,18 @@ describe("Test db functionalities", function(){
 			var message = {
 				who: "i am a cat",
 				body: "meowmeowmeow",
+				event: SocketEvent.CHAT,
 				date: new Date(Date.now())
 			}
-			db.createMessage(message.who, message.body, message.date);
-			Message.find({who: message.who, body: message.body, date: message.date}).exec(function(err, docs){
+			db.createMessage(message.who, message.body, message.event, message.date);
+			Message.find({who: message.who, body: message.body, event: message.event, date: message.date}).exec(function(err, docs){
 				if(err){return done(err)};
 				var target = [];
 				docs.forEach(function(ele){
 					target.push({
 						who: ele.who,
 						body: ele.body,
+						event: ele.event,
 						date: ele.date
 					});
 				});

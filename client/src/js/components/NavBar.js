@@ -1,8 +1,10 @@
 import React from "react";
 import {Link, IndexLink} from "react-router";
 
-import Store from "../store/Store";
+import * as store from "../store/Store";
 import * as Actions from "../actions/Actions";
+
+let Store = store.createSingletonStore();
 
 class Button extends React.Component {
 	constructor(props){
@@ -40,15 +42,14 @@ export default class NavBar extends React.Component{
 		this.state = {
 			username: ""
 		};
-		// Store.subscribe(() => {
-		// 	this.setState({
-		// 		username: Store.getState().NRChatReducer.username
-		// 	});
-		// });
+		Store.subscribe(() => {
+			this.setState({
+				username: Store.getState().NRChatReducer.username
+			});
+		});
 	}
 
 	render(){
-		let username = this.state.username ? this.state.username : "Guest";
 		return (
 			<nav className="navbar navbar-default navbar-fixed-top">
 				<div className="container-fluid">
@@ -57,7 +58,7 @@ export default class NavBar extends React.Component{
 					</div>
 					<div className="navbar-header pull-right">
 						<ul className="nav pull-left">
-							<li className="navbar-text pull-left">Hello {username}</li>
+							<li className="navbar-text pull-left">Hello {this.state.username}</li>
 							<li className="pull-right"><Button /></li>
 						</ul>
 					</div>

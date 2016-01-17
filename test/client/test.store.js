@@ -3,7 +3,6 @@ import resetDB from "../resetDB";
 import {createAnotherStore, createSingletonStore} from "../../client/src/js/store/Store";
 import * as Actions from "../../client/src/js/actions/Actions";
 import server from 	"../../server/server";
-import url from "../../server/url";
 import SocketEvent from "../../server/socket/socketEvent";
 
 describe("test client reducer", function(){
@@ -48,16 +47,6 @@ describe("test client reducer", function(){
 		});
 	});
 
-	describe("check login state", function(){
-		it("should work", function(done){
-			setTimeout(() => {
-				let username = store1.getState().NRChatReducer.username;
-				expect(username).to.match(/Guest#\S{5}$/);
-				done();
-			}, 1500);
-		});
-	});
-
 	describe("set username", function(){
 		it("shuold work", function(){
 			store1.dispatch(Actions.setUsername("123"));
@@ -65,15 +54,32 @@ describe("test client reducer", function(){
 		})
 	});
 
+	/*
+		TODO - need to figure out how to test session without supertest
+	 */
+	// describe("fetch guest name", function(){
+	// 	it("shuold work", function(){
+	// 		store1.dispatch(Actions.fetchGuestName());
+	// 		let username = store1.getState().NRChatReducer.username;
+	// 		console.log(username);
+	// 		// expect(store1.getState().NRChatReducer.username).to.eql("123");
+	// 	})
+	// });
+
 	describe("send join info", function(){
 		it("shuold work", function(done){
 			store1.subscribe(() => {
 				let messageHistory = store1.getState().NRChatReducer.messageHistory;
-				expect(messageHistory).to.have.length(1);
-				expect(messageHistory[0].who).to.eql("ggyy");
-				expect(messageHistory[0].body).to.eql("has joined the room.");
-				expect(messageHistory[0].event).to.eql(SocketEvent.JOIN);
-				done();
+				try{
+					expect(messageHistory).to.have.length(1);
+					expect(messageHistory[0].who).to.eql("ggyy");
+					expect(messageHistory[0].body).to.eql("has joined the room.");
+					expect(messageHistory[0].event).to.eql(SocketEvent.JOIN);
+					done();
+				}
+				catch(e){
+					done(e);
+				}
 			});
 			store2.dispatch(Actions.setUsername("ggyy"));
 			store2.dispatch(Actions.sendJoinInfo());
@@ -84,11 +90,16 @@ describe("test client reducer", function(){
 		it("shuold work", function(done){
 			store1.subscribe(() => {
 				let messageHistory = store1.getState().NRChatReducer.messageHistory;
-				expect(messageHistory).to.have.length(1);
-				expect(messageHistory[0].who).to.eql("ggyy");
-				expect(messageHistory[0].body).to.eql("has left the room.");
-				expect(messageHistory[0].event).to.eql(SocketEvent.LEAVE);
-				done();
+				try{
+					expect(messageHistory).to.have.length(1);
+					expect(messageHistory[0].who).to.eql("ggyy");
+					expect(messageHistory[0].body).to.eql("has left the room.");
+					expect(messageHistory[0].event).to.eql(SocketEvent.LEAVE);
+					done();
+				}
+				catch(e){
+					done(e);
+				}
 			});
 			store2.dispatch(Actions.setUsername("ggyy"));
 			store2.dispatch(Actions.sendLeaveInfo());
@@ -99,51 +110,202 @@ describe("test client reducer", function(){
 		it("shuold work", function(done){
 			store1.subscribe(() => {
 				let messageHistory = store1.getState().NRChatReducer.messageHistory;
-				expect(messageHistory).to.have.length(1);
-				expect(messageHistory[0].who).to.eql("ggyy");
-				expect(messageHistory[0].body).to.eql("weeeeeeeee");
-				expect(messageHistory[0].event).to.eql(SocketEvent.CHAT);
-				done();
+				try{
+					expect(messageHistory).to.have.length(1);
+					expect(messageHistory[0].who).to.eql("ggyy");
+					expect(messageHistory[0].body).to.eql("weeeeeeeee");
+					expect(messageHistory[0].event).to.eql(SocketEvent.CHAT);
+					done();
+				}
+				catch(e){
+					done(e);
+				}
 			});
 			store2.dispatch(Actions.setUsername("ggyy"));
 			store2.dispatch(Actions.sendMessage("weeeeeeeee"));
 		})
 	});
 
-	describe("fetch message", function(){
+	describe("fetch message history", function(){
 		it("shuold work", function(done){
 			store1.subscribe(() => {
 				let messageHistory = store1.getState().NRChatReducer.messageHistory;
-				expect(messageHistory).to.have.length(3);
-				done();
+				try{
+					expect(messageHistory).to.have.length(3);
+					done();
+				}
+				catch(e){
+					done(e);
+				}
 			});
 			store1.dispatch(Actions.fetchMessageHistory());
 		})
 	});
 
-	describe("login", function(){
-		it("login failed", function(done){
+	describe("auth", function(){
+		it("request authentication successfully", function(done){
 			store1.subscribe(() => {
-				let res = store1.getState().NRChatReducer.response;
-				expect(res).to.eql({status: 400, message: "invalid username or password!"});
-				done();
+				try{
+					let token = store1.getState().NRChatReducer.token;
+					let username = store1.getState().NRChatReducer.username;
+					let lastResponse = store1.getState().NRChatReducer.lastResponse;
+					expect(token).to.be.not.empty;
+					expect(username).to.eql("ggyy");
+					expect(lastResponse).to.have.any.keys({
+						success: true,
+						username: "ggyy",
+						message: "OK"
+					});
+					done();
+				}
+				catch(e){
+					done(e);
+				}
 			});
-			store1.dispatch(Actions.requestLogin("ggyy", "123123"));
+			store1.dispatch(Actions.requestAuth("ggyy", "1234"));
 		});
 
-		it("login successfully", function(){
+		it("request authentication failed", function(done){
 			store1.subscribe(() => {
-				let res = store1.getState().NRChatReducer.response;
-				expect(res).to.eql({status: 307, location: url.INDEX});
-				done();
+				try{
+					let token = store1.getState().NRChatReducer.token;
+					let username = store1.getState().NRChatReducer.username;
+					let lastResponse = store1.getState().NRChatReducer.lastResponse;
+					expect(token).to.be.empty;
+					expect(username).to.be.empty;
+					expect(lastResponse).to.eql({
+						success: false,
+						message: "Invalid username or password!"
+					});
+					done();
+				}
+				catch(e){
+					done(e);
+				}
 			});
-			store1.dispatch(Actions.requestLogin("ggyy", "1234"));
+			store1.dispatch(Actions.requestAuth("ggyy", "12345"));
 		});
+
+		describe("validate token", function(){
+			let token;
+			it("setup token", function(done){
+				store1.subscribe(() => {
+					token = store1.getState().NRChatReducer.token;
+					done();
+				});
+				store1.dispatch(Actions.requestAuth("ggyy", "1234"));
+			});
+
+			it("should succeed", function(done){
+				store1.subscribe(() => {
+					try{
+						let token = store1.getState().NRChatReducer.token;
+						let username = store1.getState().NRChatReducer.username;
+						let lastResponse = store1.getState().NRChatReducer.lastResponse;
+						expect(token).to.be.not.empty;
+						expect(username).to.eql("ggyy");
+						expect(lastResponse).to.have.any.keys({
+							success: true,
+							username: "ggyy",
+							message: "OK"
+						});
+						done();
+					}
+					catch(e){
+						done(e);
+					}
+				});
+				store1.dispatch(Actions.checkAuth(token));
+			});
+
+			it("should fail", function(done){
+				store1.subscribe(() => {
+					try{
+						let token = store1.getState().NRChatReducer.token;
+						let username = store1.getState().NRChatReducer.username;
+						let lastResponse = store1.getState().NRChatReducer.lastResponse;
+						expect(token).to.be.empty;
+						expect(username).to.be.empty;
+						expect(lastResponse).to.eql({
+							success: false,
+							message: "Invalid token!"
+						});
+						done();
+					}
+					catch(e){
+						done(e);
+					}
+				});
+				store1.dispatch(Actions.checkAuth("no suck token"));
+			});
+		});
+
+		describe("test signup", function(){
+			it("shuold work", function(done){
+				store1.subscribe(() => {
+					try{
+						let token = store1.getState().NRChatReducer.token;
+						let username = store1.getState().NRChatReducer.username;
+						let lastResponse = store1.getState().NRChatReducer.lastResponse;
+						expect(token).to.be.not.empty;
+						expect(username).to.eql("newUser");
+						expect(lastResponse).to.have.any.keys({
+							success: true,
+							username: "newUser",
+							message: "OK"
+						});
+						done();
+					}
+					catch(e){
+						done(e);
+					}
+				});
+				store1.dispatch(Actions.requestSignup("newUser", "qqqq"));
+			});
+
+			it("should fail when username collision", function(done){
+				store1.subscribe(() => {
+					try{
+						let token = store1.getState().NRChatReducer.token;
+						let username = store1.getState().NRChatReducer.username;
+						let lastResponse = store1.getState().NRChatReducer.lastResponse;
+						expect(token).to.be.empty;
+						expect(username).to.be.empty;
+						expect(lastResponse).to.have.any.keys({
+							success: false,
+							message: "This name has already been taken!"
+						});
+						done();
+					}
+					catch(e){
+						done(e);
+					}
+				});
+				store1.dispatch(Actions.requestSignup("ggyy", "qwerty"));
+			})
+		});
+
+		describe("logout", function(){
+			it("should logout", function(){
+				let counter = 0;
+				store1.subscribe(() => {
+					counter++;
+					if(counter > 1){
+						try{
+							let token = store1.getState().NRChatReducer.token;
+							expect(token).to.be.empty;
+							done();
+						}
+						catch(e){
+							done(e);
+						}
+					}
+				});
+				store1.dispatch(Actions.requestAuth("ggyy", "1234"))
+				store1.dispatch(Actions.logout());
+			});
+		});
+
 	});
 
-	describe("logout", function(){
-		it("shuold work", function(done){
-
-		});
-	});
 });
