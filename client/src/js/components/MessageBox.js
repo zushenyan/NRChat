@@ -1,7 +1,10 @@
 import React from "react";
 
-import Store from "../redux/MainReducer";
-import * as ChatAction from "../redux/NRChatReducer";
+import * as store from "../store/Store";
+import * as Actions from "../actions/Actions";
+import SocketEvent from "../env/SocketEvent";
+
+let Store = store.createSingletonStore();
 
 class ServerMessage extends React.Component{
 	constructor(props){
@@ -11,11 +14,14 @@ class ServerMessage extends React.Component{
 	render(){
 		return (
 			<div className="row">
-				<span className="col-xs-12 text-left" style={{ color: "red" }}>{ this.props.message }</span>
+				<span className="col-xs-10 text-left" style={{ color: this.props.color }}>{ this.props.message }</span>
+				<span className="col-xs-2 text-right">{ this.props.date }</span>
 			</div>
 		);
 	}
 }
+
+ServerMessage.defaultProps = { color: "red" };
 
 class ChatMessage extends React.Component{
 	constructor(props){
@@ -27,6 +33,7 @@ class ChatMessage extends React.Component{
 			<div className="row">
 				<span className="col-xs-2 text-left">{ this.props.user }</span>
 				<span className="col-xs-8 text-left">{ this.props.message }</span>
+				<span className="col-xs-2 text-right">{ this.props.date }</span>
 			</div>
 		);
 	}
@@ -36,15 +43,28 @@ export default class MessageBox extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			messages: []
+			messages: [],
+			unsubscribe: null
 		};
-		Store.subscribe(this.fetchMessages.bind(this));
-		Store.dispatch(ChatAction.fetchMessages());
+	}
+
+	componentDidMount(){
+		let unsub = Store.subscribe(this.fetchMessages.bind(this));
+		this.setState({
+			unsubscribe: unsub
+		});
+		if(Store.getState().NRChatReducer.messageHistory.length === 0){
+			Store.dispatch(Actions.fetchMessageHistory());
+		}
+	}
+
+	componentWillUnmount(){
+		this.state.unsubscribe();
 	}
 
 	fetchMessages(){
 		this.setState({
-			messages: Store.getState().NRChatReducer.messages
+			messages: Store.getState().NRChatReducer.messageHistory
 		});
 	}
 
@@ -53,19 +73,22 @@ export default class MessageBox extends React.Component{
 		let messageNodes = [];
 		this.state.messages.forEach((ele, index) => {
 			let messageNode = null;
+			let tempDate = ele.date.split("T")[0];
+			let tempTime = ele.date.split("T")[1].split(".")[0];
+			let date = [tempDate, tempTime].join("  ");
 			switch(ele.event){
-				case ChatAction.EVENT_HELLO:
-					messageNode = (<ServerMessage message={ele.user + " has joined the room."} key={index} />);
+				case SocketEvent.JOIN:
+					messageNode = (<ServerMessage message={ele.who + " has joined the room."} color={"blue"} date={date} key={index} />);
 					break;
-				case ChatAction.EVENT_BEFORE_DISCONNECT:
-					messageNode = (<ServerMessage message={ele.user + " has left the room."} key={index} />);
+				case SocketEvent.LEAVE:
+					messageNode = (<ServerMessage message={ele.who + " has left the room."} color={"blue"} date={date} key={index} />);
 					break;
-				case ChatAction.EVENT_ERROR:
-					messageNode = (<ServerMessage message={ele.message} key={index} />);
+				case SocketEvent.ERROR:
+					messageNode = (<ServerMessage message={ele.body} key={index} />);
 					break;
-				case ChatAction.EVENT_CHAT:
+				case SocketEvent.CHAT:
 				default:
-					messageNode = (<ChatMessage user={ele.user} message={ele.message} key={index} />);
+					messageNode = (<ChatMessage user={ele.who} message={ele.body} date={date} key={index} />);
 			}
 			messageNodes.push(messageNode);
 		});

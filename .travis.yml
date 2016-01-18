@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+- "5.1"
+services:
+- mongodb
+before_script:
+- npm install
+script:
+- mocha --compilers js:babel-core/register test/server/test.db
+- mocha --compilers js:babel-core/register test/server/test.routes
+- mocha --compilers js:babel-core/register test/server/test.socket
+- mocha --compilers js:babel-core/register test/client
