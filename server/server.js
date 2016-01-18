@@ -44,7 +44,7 @@ else {
 function open(callback){
 	server = app.listen(PORT, function(){
 		io.listen(server);
-		mongoose.connect(MONGOLAB_URI);
+		mongoose.connect(DATABASE_URI);
 		expose.server = server;
 		if(callback){ callback(); }
 		console.log("server is running...");
