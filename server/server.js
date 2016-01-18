@@ -12,6 +12,7 @@ var apiRoutes = require("./routes/api");
 var indexRoutes = require("./routes/index");
 
 var PORT = process.env.PORT || 8080;
+var DATABASE_URI = process.env.MONGOLAB_URI || "mongodb://localhost:27017";
 
 var app = express()
 	.use(express.static(path.join(__dirname, "..", "client/dist/")))
@@ -43,7 +44,7 @@ else {
 function open(callback){
 	server = app.listen(PORT, function(){
 		io.listen(server);
-		mongoose.connect("mongodb://localhost:27017");
+		mongoose.connect(MONGOLAB_URI);
 		expose.server = server;
 		if(callback){ callback(); }
 		console.log("server is running...");
