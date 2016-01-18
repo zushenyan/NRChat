@@ -5,6 +5,7 @@ NRChat represents Node React Chat, which is yet another web development practice
 Run it locally:
 
 ```bash
+$ redis-server
 $ clone https://github.com/zushenyan/NRChat.git
 $ cd NRChat
 $ node server/server
@@ -20,11 +21,11 @@ And go to `http://localhost:8080`.
 * JavaScript
   * Node & Express
   * Babel/ES6
-	* Webpack
-	* Gulp
-	* React
-	* Redux
-	* and tons of libs...
+  * Webpack
+  * Gulp
+  * React
+  * Redux
+  * and tons of libs...
 * Redis
 * Heroku
 
