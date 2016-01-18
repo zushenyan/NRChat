@@ -54,17 +54,21 @@ describe("test client reducer", function(){
 		})
 	});
 
-	/*
-		TODO - need to figure out how to test session without supertest
-	 */
-	// describe("fetch guest name", function(){
-	// 	it("shuold work", function(){
-	// 		store1.dispatch(Actions.fetchGuestName());
-	// 		let username = store1.getState().NRChatReducer.username;
-	// 		console.log(username);
-	// 		// expect(store1.getState().NRChatReducer.username).to.eql("123");
-	// 	})
-	// });
+	describe("fetch guest name", function(){
+		it("shuold work", function(done){
+			store1.subscribe(() => {
+				try{
+					let username = store1.getState().NRChatReducer.username;
+					expect(username).to.match(/Guest#\S{5}/);
+					done();
+				}
+				catch(e){
+					done(e);
+				}
+			});
+			store1.dispatch(Actions.fetchGuestName());
+		})
+	});
 
 	describe("send join info", function(){
 		it("shuold work", function(done){
@@ -131,7 +135,7 @@ describe("test client reducer", function(){
 			store1.subscribe(() => {
 				let messageHistory = store1.getState().NRChatReducer.messageHistory;
 				try{
-					expect(messageHistory).to.have.length(3);
+					expect(messageHistory).to.have.length(4);
 					done();
 				}
 				catch(e){
@@ -188,6 +192,7 @@ describe("test client reducer", function(){
 
 		describe("validate token", function(){
 			let token;
+
 			it("setup token", function(done){
 				store1.subscribe(() => {
 					token = store1.getState().NRChatReducer.token;

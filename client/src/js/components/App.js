@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {Router, Route, Link, IndexLink, browserHistory, IndexRoute} from "react-router";
-import createBrowserHistory from "history/lib/createBrowserHistory";
+import {Router, Route, Link, IndexLink, IndexRoute} from "react-router";
+import History from "../env/History";
 
 import NavBar from "./NavBar";
 import ChatBox from "./ChatBox";
@@ -34,7 +34,9 @@ class App extends React.Component{
 	}
 
 	componentWillUnmount(){
-		Store.dispatch(Actions.sendLeaveInfo());
+		if(Store.getState().NRChatReducer.token){
+			Store.dispatch(Actions.sendLeaveInfo());
+		}
 	}
 
 	render(){
@@ -48,7 +50,7 @@ class App extends React.Component{
 }
 
 ReactDOM.render(
-	<Router history={ createBrowserHistory() }>
+	<Router history={ History }>
 		<Route path="/" component={ App }>
 			<IndexRoute component={ MainView } />
 			<Route path="/login" component={ Login } />

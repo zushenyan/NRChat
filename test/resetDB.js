@@ -54,7 +54,7 @@ function resetDB(callback, disconnectOnEnd){
 	});
 }
 
-if(process.argv[2] === "1"){
+if(process.argv.length < 3){
 	console.log("running reset DB...");
 	resetDB();
 }

@@ -25,18 +25,46 @@ class Button extends React.Component {
 			hover: false
 		});
 	}
+}
+
+class LoginButton extends Button {
+	constructor(props){
+		super(props);
+	}
 
 	render(){
-		let link = <Link className="btn btn-default navbar-btn" to="/login">Login</Link>;
-		if(window.location.pathname !== "/"){
-			let style = this.state.hover ? { backgroundColor: "#c9302c" } : {};
-			link = <IndexLink style={style} className="btn btn-danger navbar-btn" to="/" onMouseOver={this.mouseOver.bind(this)} onMouseOut={this.mouseOut.bind(this)}>Go Back</IndexLink>;
-		}
-		return link;
+		return (<Link className="btn btn-default navbar-btn" to="/login">Login</Link>);
 	}
 }
 
-export default class NavBar extends React.Component{
+class GoBackButton extends Button {
+	constructor(props){
+		super(props);
+	}
+
+	render(){
+		let style = this.state.hover ? { backgroundColor: "#c9302c" } : {};
+		return (<IndexLink style={style} className="btn btn-danger navbar-btn" to="/" onMouseOver={this.mouseOver.bind(this)} onMouseOut={this.mouseOut.bind(this)}>Go Back</IndexLink>);
+	}
+}
+
+class LogoutButton extends Button {
+	constructor(props){
+		super(props);
+	}
+
+	handleClick(){
+		Store.dispatch(Actions.logout());
+		Store.dispatch(Actions.fetchGuestName());
+		Store.dispatch(Actions.sendLeaveInfo());
+	}
+
+	render(){
+		return (<IndexLink className="btn btn-default navbar-btn" to="/" onClick={ this.handleClick.bind(this) }>Logout</IndexLink>);
+	}
+}
+
+export default class NavBar extends React.Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -49,7 +77,21 @@ export default class NavBar extends React.Component{
 		});
 	}
 
+	componentDidMount(){
+		Store.dispatch(Actions.fetchGuestName());
+	}
+
 	render(){
+		let token = Store.getState().NRChatReducer.token;
+		let button = <LoginButton />;
+
+		if(window.location.pathname !== "/"){
+			button = <GoBackButton />;
+		}
+		if(token){
+			button = <LogoutButton />;
+		}
+
 		return (
 			<nav className="navbar navbar-default navbar-fixed-top">
 				<div className="container-fluid">
@@ -59,7 +101,7 @@ export default class NavBar extends React.Component{
 					<div className="navbar-header pull-right">
 						<ul className="nav pull-left">
 							<li className="navbar-text pull-left">Hello {this.state.username}</li>
-							<li className="pull-right"><Button /></li>
+							<li className="pull-right">{ button }</li>
 						</ul>
 					</div>
 				</div>

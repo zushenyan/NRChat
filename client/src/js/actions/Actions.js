@@ -12,7 +12,6 @@ export const RECEIVE_AUTH = "receive auth";
 export const LOGOUT = "logout";
 export const SET_USERNAME = "set username";
 
-// actions
 export function setup({onJoin, onError, onChat, onLeave}){
 	return {
 		type: SETUP,

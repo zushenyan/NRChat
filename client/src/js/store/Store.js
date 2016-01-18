@@ -34,7 +34,6 @@ function setup(store){
 		onJoin: getMessage,
 		onLeave: getMessage
 	}));
-	store.dispatch(Actions.fetchGuestName());
 	function getMessage(data){
 		store.dispatch(Actions.receiveMessage(data));
 	}

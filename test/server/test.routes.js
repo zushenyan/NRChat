@@ -79,7 +79,7 @@ describe("Test API", function(){
 					.set("Accept", "application/json")
 					.send({username: "ggyy", password: "no such password"})
 					.expect("Content-Type", /json/)
-					.expect(404, {
+					.expect(400, {
 						success: false,
 						message: "Invalid username or password!"
 					}, done)

@@ -88,8 +88,8 @@ function _sendLeaveInfo(state, action){
 
 function _receiveAuth(state, action){
 	return _.assign({}, state, {
-		username: action.payload.username || "",
-		token: action.payload.token || "",
+		username: action.payload.username || state.username,
+		token: action.payload.token || state.token,
 		lastResponse: action.payload
 	});
 }

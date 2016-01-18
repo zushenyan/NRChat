@@ -5,13 +5,13 @@ var UserSchema = new mongoose.Schema({
 	username: {
 		type: String,
 		require: true,
-		minlength: 3,
+		minlength: 4,
 		unique: true,
 	},
 	password: {
 		type: String,
 		require: true,
-		minlength: 3,
+		minlength: 4,
 	}
 });
 
