@@ -32,7 +32,7 @@ And go to `http://localhost:8080`.
 * JavaScript
   * Node & Express
   * Babel/ES6
-	* Webpack
-	* React/Redux/React-Router
+  * Webpack
+  * React/Redux/React-Router
 * MongoDB
 * JSON Web Token
