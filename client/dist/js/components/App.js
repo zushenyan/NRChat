@@ -45930,13 +45930,17 @@
 		_createClass(MessageBox, [{
 			key: "componentDidMount",
 			value: function componentDidMount() {
+				if (Store.getState().NRChatReducer.messageHistory.length === 0) {
+					Store.dispatch(Actions.fetchMessageHistory());
+				} else {
+					this.setState({
+						messages: Store.getState().NRChatReducer.messageHistory
+					});
+				}
 				var unsub = Store.subscribe(this.fetchMessages.bind(this));
 				this.setState({
 					unsubscribe: unsub
 				});
-				if (Store.getState().NRChatReducer.messageHistory.length === 0) {
-					Store.dispatch(Actions.fetchMessageHistory());
-				}
 			}
 		}, {
 			key: "componentWillUnmount",

@@ -49,13 +49,18 @@ export default class MessageBox extends React.Component{
 	}
 
 	componentDidMount(){
+		if(Store.getState().NRChatReducer.messageHistory.length === 0){
+			Store.dispatch(Actions.fetchMessageHistory());
+		}
+		else{
+			this.setState({
+				messages: Store.getState().NRChatReducer.messageHistory
+			});
+		}
 		let unsub = Store.subscribe(this.fetchMessages.bind(this));
 		this.setState({
 			unsubscribe: unsub
 		});
-		if(Store.getState().NRChatReducer.messageHistory.length === 0){
-			Store.dispatch(Actions.fetchMessageHistory());
-		}
 	}
 
 	componentWillUnmount(){
