@@ -10,7 +10,9 @@ Another improvement in this version is that I made this application act really l
 If you want to know more about token vs session based authentication please go [here](http://stackoverflow.com/questions/17000835/token-authentication-vs-cookies) for detail.
 
 # How to Run
-Run it locally:
+Check [NRChat on Heroku](http://nrchat.herokuapp.com/);
+
+Or run it locally:
 
 ```bash
 $ redis-server

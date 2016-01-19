@@ -45686,8 +45686,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var location = location ? location : null;
-	var SERVER_URL = exports.SERVER_URL = location ? location.origin : "http://localhost:8080";
+	var SERVER_URL = exports.SERVER_URL = window && window.location ? location.origin : "http://localhost:8080";
 	var SERVER_FETCH_MESSAGE = exports.SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
 	var SERVER_FETCH_GUESTNAME = exports.SERVER_FETCH_GUESTNAME = SERVER_URL + "/api/id";
 	var SERVER_AUTH = exports.SERVER_AUTH = SERVER_URL + "/auth/authenticate";
