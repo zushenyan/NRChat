@@ -14,8 +14,8 @@ class ServerMessage extends React.Component{
 	render(){
 		return (
 			<div className="row">
-				<span className="col-xs-10 text-left" style={{ color: this.props.color }}>{ this.props.message }</span>
-				<span className="col-xs-2 text-right">{ this.props.date }</span>
+				<span className="col-xs-8 text-left" style={{ color: this.props.color }}>{ this.props.message }</span>
+				<span className="col-xs-4 text-right message">{ this.props.date }</span>
 			</div>
 		);
 	}
@@ -31,9 +31,9 @@ class ChatMessage extends React.Component{
 	render(){
 		return (
 			<div className="row">
-				<span className="col-xs-2 text-left">{ this.props.user }</span>
-				<span className="col-xs-8 text-left">{ this.props.message }</span>
-				<span className="col-xs-2 text-right">{ this.props.date }</span>
+				<span className="col-xs-3 text-left message-word-break">{ this.props.user }</span>
+				<span className="col-xs-5 text-left message-word-break">{ this.props.message }</span>
+				<span className="col-xs-4 text-right message-word-break">{ this.props.date }</span>
 			</div>
 		);
 	}

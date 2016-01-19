@@ -45686,7 +45686,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var SERVER_URL = exports.SERVER_URL = window && window.location ? location.origin : "http://localhost:8080";
+	var SERVER_URL = exports.SERVER_URL = typeof location !== "undefined" ? location.origin : "http://localhost:8080";
 	var SERVER_FETCH_MESSAGE = exports.SERVER_FETCH_MESSAGE = SERVER_URL + "/api/messages";
 	var SERVER_FETCH_GUESTNAME = exports.SERVER_FETCH_GUESTNAME = SERVER_URL + "/api/id";
 	var SERVER_AUTH = exports.SERVER_AUTH = SERVER_URL + "/auth/authenticate";
@@ -45858,12 +45858,12 @@
 					{ className: "row" },
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-10 text-left", style: { color: this.props.color } },
+						{ className: "col-xs-8 text-left", style: { color: this.props.color } },
 						this.props.message
 					),
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-2 text-right" },
+						{ className: "col-xs-4 text-right message" },
 						this.props.date
 					)
 				);
@@ -45892,17 +45892,17 @@
 					{ className: "row" },
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-2 text-left" },
+						{ className: "col-xs-3 text-left message-word-break" },
 						this.props.user
 					),
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-8 text-left" },
+						{ className: "col-xs-5 text-left message-word-break" },
 						this.props.message
 					),
 					_react2.default.createElement(
 						"span",
-						{ className: "col-xs-2 text-right" },
+						{ className: "col-xs-4 text-right message-word-break" },
 						this.props.date
 					)
 				);
