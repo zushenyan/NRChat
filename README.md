@@ -15,7 +15,6 @@ Check [NRChat on Heroku](http://nrchat.herokuapp.com/);
 Or run it locally:
 
 ```bash
-$ redis-server
 $ clone https://github.com/zushenyan/NRChat.git
 $ cd NRChat
 $ mongod
